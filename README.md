@@ -9,7 +9,17 @@ This project has two sub-module
 
 Before run agenspop, you should setup elasticsearch.
 - modify es-config.yml for connecting your ES
- 
+
+## summary 
+
+그래프 쿼리(gremlin&cypher)가 가능한 백엔드와 Webgl/Canvas 시각화 도구
+
+- build : mvn clean install -DskipTests
+- deploy : backend/target/agenspop-es-0.7.jar 
+- run : java -jar <jar_file> --spring.config.name=es-config
+- visualization client : http://<IP:PORT>/index.html
+
+
 ## _`agenspop`_ main features
 
 ## Rest-API
