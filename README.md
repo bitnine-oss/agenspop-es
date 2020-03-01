@@ -19,9 +19,9 @@ Gremlin과 Cypher를 지원하며 개별적인 API 를 통해 그래프 데이�
 그래프 분석은 Spark 분산 플랫폼을 통해 ES-hadoop 에 접근하여 대규모 빅그래프 데이터에 대한 그래프 분석을 빠르게 수행할 수 있습니다.
 ES에 대한 그래프 데이터는 logstash 라는 ETL 도구를 통해 적재할 수 있습니다. 
 
-- [Agenspop-es](https://github.com/bitnine-oss/agenspop-es) : 빅그래프의 쿼리 엔진과 시각화 도구
-- [Agenspop-spark](https://github.com/bitnine-oss/agenspop-spark) : 빅그래프 Spark 분석 서버
-- [ls-filter-agenspop](https://github.com/bitnine-oss/ls-filter-agenspop) : 그래프 적재를 위한 logstash filter plugin
+- [Agenspop-es](https://github.com/bitnine-oss/agenspop-es){:target="_blank"} : 빅그래프의 쿼리 엔진과 시각화 도구
+- [Agenspop-spark](https://github.com/bitnine-oss/agenspop-spark){:target="_blank"} : 빅그래프 Spark 분석 서버
+- [ls-filter-agenspop](https://github.com/bitnine-oss/ls-filter-agenspop){:target="_blank"} : 그래프 적재를 위한 logstash filter plugin
 
 ## build & deploy 
 
