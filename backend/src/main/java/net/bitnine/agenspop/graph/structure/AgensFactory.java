@@ -63,6 +63,7 @@ public final class AgensFactory {
      */
     public static AgensGraph createModern(BaseGraphAPI baseGraph) {
         final Configuration conf = getMixIdManagerConfiguration();
+        conf.setProperty(AgensGraph.GREMLIN_AGENSGRAPH_GRAPH_NAME, "modern");
         final AgensGraph g = AgensGraph.open(baseGraph, conf);
         generateModern(g);
         return g;

@@ -79,7 +79,7 @@ public class ManagerController {
         try { manager.removeGraph(gName); } catch( Exception e ){ }
         try {
             System.out.println("remove sample graph.. ["+gName+"]");
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

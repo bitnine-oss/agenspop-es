@@ -67,8 +67,8 @@ public class AgensGraphManager implements GraphManager {
     }
 
     public AgensGraph resetSampleGraph(){
-        String gName = "modern";
         AgensGraph g = AgensFactory.createModern(baseAPI);
+        String gName = g.name();
         putGraph(gName, g);
         updateTraversalSource(gName, g);
 
