@@ -3,20 +3,16 @@ server:
   port: 8080
   error:
     whitelabel:
-      enabled: false
+      enabled: false            # disable default error-page
 
 spring:
   pid:
-    file: agenspop.pid
+    file: agenspop.pid          # pid filename when start process (not working)
   main:
-    banner-mode: "off"
+    banner-mode: "off"          # hide spring banner when start process
   resources:
     cache:
-      period: 3600
-    static-locations: classpath:/resources/,classpath:/static/
-  groovy:
-    template:
-      check-template-location: false
+      period: 3600              # seconds
 
 agens:
   api:
@@ -25,27 +21,17 @@ agens:
   elasticsearch:
     host: 27.117.163.21
     port: 15619
-#    host: 192.168.0.54
-#    port: 8087
+    # host: 192.168.0.54
+    # port: 8087
     username:
     password:
-    scroll-limit: -1            # -1(unlimit), more than 2500
+    scroll-limit: -1            # -1(unlimit) or more than 2500
     vertex-index: elasticvertex
     edge-index: elasticedge
     edge-validation: false      # if true, check valid edge on each request (make slow)
     index-shards: 2             # when create index, apply to setting
     index-replicas: 0           # when create index, apply to setting
-  spark:
-    app-name: es-bitnine
-    spark-home: ~/Servers/spark
-    master-uri: local
   product:
     name: agenspop-es
     version: 0.7.3-dev
     hello-msg: agenspop-elasticgraph v1.0 (since 2019-08-01)
-  drivers:
-    #path: ./drivers
-    path: classpath:bin
-    jars:
-      pgsql: postgresql-42.2.5.jar
-      mysql: mysql-connector-java-5.1.47-bin.jar
