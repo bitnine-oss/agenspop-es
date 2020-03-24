@@ -107,7 +107,8 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   actionEvent($event:IEvent){    // { type: show/hide, data: { index, id } }
     // for DEBUG
     if( localStorage.getItem('debug')=='true' ){
-      if( $event.type != 'spinner' ) console.log('actionEvent on '+this.screenMode+':', $event);
+      if( $event.type != 'spinner' && $event.type != 'property-hide' )
+        console.log('actionEvent on '+this.screenMode+':', $event);
     }
 
     if( $event.type == 'property-show' ){

@@ -330,7 +330,7 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
     if( !this.el ) return;
 
     // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log('selectLabel("'+index+'")', label);
+    if( localStorage.getItem('debug')=='true' ) console.log('selectLabel("'+index+'"):', label);
 
     if( index === 'v' ) this.el.selectGroup(label.idx);
     // else{

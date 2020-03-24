@@ -234,7 +234,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadGraph(g:IGraph){
     // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log('loadGraph', g);
+    // if( localStorage.getItem('debug')=='true' ) console.log('loadGraph', g);
 
     let pan = g.hasOwnProperty('pan') ? g['pan'] : { x:0, y:0 };
     let config:any = Object.assign( _.cloneDeep(CY_CONFIG), {
@@ -782,7 +782,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     if( !this.cy ) return;
 
     // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log('selectLabel', index, label);
+    if( localStorage.getItem('debug')=='true' ) console.log('selectLabel("'+index+'"):', label);
 
     // this.cy.$(':selected').unselect();
     Promise.resolve()
