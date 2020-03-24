@@ -47,5 +47,6 @@ public class AgensWebConfig implements WebMvcConfigurer {
         // registry.addViewController("/").setViewName("redirect:/index.html");
 
         registry.addRedirectViewController("/", "/index.html");
+        registry.addRedirectViewController("/workspace", "/index.html");
     }
 }

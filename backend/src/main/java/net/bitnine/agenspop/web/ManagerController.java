@@ -1,6 +1,7 @@
 package net.bitnine.agenspop.web;
 
 import lombok.extern.slf4j.Slf4j;
+import net.bitnine.agenspop.config.properties.FrontProperties;
 import net.bitnine.agenspop.config.properties.ProductProperties;
 import net.bitnine.agenspop.elasticgraph.model.ElasticEdge;
 import net.bitnine.agenspop.elasticgraph.model.ElasticVertex;
@@ -28,14 +29,17 @@ public class ManagerController {
 
     private final AgensGraphManager manager;
     private final ProductProperties productProperties;
+    private final FrontProperties frontProperties;
 
     @Autowired
     public ManagerController(
             AgensGraphManager manager,
-            ProductProperties productProperties
+            ProductProperties productProperties,
+            FrontProperties frontProperties
     ){
         this.manager = manager;
         this.productProperties = productProperties;
+        this.frontProperties = frontProperties;
     }
 
     ///////////////////////////////////////////
@@ -44,6 +48,13 @@ public class ManagerController {
     @ResponseStatus(HttpStatus.OK)
     public String hello() throws Exception {
         return "{ \"msg\": \"Hello, admin!\"}";
+    }
+
+    @GetMapping(value="/config", produces="application/json; charset=UTF-8")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Map<String,Object>> config() throws Exception {
+        return new ResponseEntity<>(frontProperties.toMap()
+                , AgensUtilHelper.productHeaders(productProperties), HttpStatus.OK);
     }
 
     @GetMapping(value="/graphs", produces="application/json; charset=UTF-8")

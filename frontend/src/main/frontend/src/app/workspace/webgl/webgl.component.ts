@@ -1,5 +1,5 @@
 import { Component, OnInit, HostListener, Output, EventEmitter, ViewChild, ElementRef, OnDestroy, Input, AfterViewInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+// import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, Subject, timer, forkJoin, BehaviorSubject } from 'rxjs';
 import { catchError, map, tap, debounceTime  } from 'rxjs/operators';
 import * as _ from 'lodash';
@@ -35,6 +35,10 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   // **NOTE: 사용자 이벤트 전달을 위해 EventEmitter 를 사용하면 안됨
   //      ==> @Output 에 의한 올바른 사용이 아니라서 이벤트가 중복으로 두번씩 날라오게됨
   private uiEventsEmitter = new Subject<any>();
+  // **NOTE : When ng build --prod, ERROR happened
+  // ==>
+  // Directive WebglComponent, Expected 1 arguments, but got 0
+
   @HostListener('window:resize', ['$event.target.innerWidth','$event.target.innerHeight'])
   onWindowResize(width: number, height:number) {
     this.uiEventsEmitter.next({ type:'resize', data: {width, height} });
@@ -47,14 +51,14 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   onMouseDblClick($event:any):void {
     this.uiEventsEmitter.next({ type:'mouse-dblclick', data: $event });
   }
-  @HostListener('document:keydown.shift')
-  onKeyDown($event:any):void {
-    this.uiEventsEmitter.next({ type:'key-shift', data: true });
-  }  
   @HostListener('document:keyup.shift')
-  onKeyUp($event:any):void {
+  onShiftKeyUp():void {
     this.uiEventsEmitter.next({ type:'key-shift', data: false });
-  }  
+  }
+  @HostListener('document:keydown.shift')
+  onShiftKeyDown():void {
+    this.uiEventsEmitter.next({ type:'key-shift', data: true });
+  }
 
   private elPrevEvent:any = { type: undefined, data: undefined };  // 중복 idle 이벤트 제거용
 
@@ -67,8 +71,6 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() readyEmitter = new EventEmitter<IEvent>();
 
   @ViewChild("el", {read: ElementRef, static: false}) divEl: ElementRef;
-
-  constructor(private http: HttpClient) { }
 
   ngOnInit(){
     // UI events
@@ -89,7 +91,6 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(){
-    console.log('** webgl destroy');
     if( this.el ){
       this.el.setInteractionMode('select');
       this.el.destroy();
@@ -99,8 +100,9 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handleError<T> (operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-        // TODO: send the error to remote logging infrastructure
-      console.log(`${operation} failed: ${error.message}`);
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log(`${operation} failed: ${error.message}`);
+
       // Let the app keep running by returning an empty result.
       return of(result as T);
     };
@@ -146,6 +148,9 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
     this.elInit(model);
   }
 
+/*
+  constructor(private http: HttpClient) { }
+
   demoLoad(){
     let nodes$:Observable<any[]> = this.http.get<any[]>('api/nodes')
       .pipe( // tap(_ => console.log('fetched nodes of GRAPH')),
@@ -181,6 +186,7 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
       this.elInit(model);
     });
   }
+*/
 
   elInit(model:any){
     if( this.el ){
@@ -244,7 +250,6 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   elNodesCrop(targets:any){
-    // console.log('elNodesCrop :', targets);
     this.cropToCyEmitter.emit(targets);
   }
   elNodeClick(target:any){
@@ -311,7 +316,9 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////
 
   selectElement(index:string, target:IElement){
-    console.log('webgl::selectElement', index, target);
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('webgl::selectElement', index, target);
+
     if( index == 'v' ){
       let e = this.model.nodes[target.scratch._idx];
       this.el.selectNode(target.scratch._idx);
@@ -321,7 +328,10 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectLabel(index:string, label:any){
     if( !this.el ) return;
-    console.log('selectLabel("'+index+'")', label);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('selectLabel("'+index+'")', label);
+
     if( index === 'v' ) this.el.selectGroup(label.idx);
     // else{
     //   if( this.edge_labels_dic.has(label.label) ){
@@ -338,7 +348,9 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changeLayout(name:string){
     if( !this.el ) return;
-    console.log('changeLayout', name);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('changeLayout', name);
 
     let model;
     try{
@@ -377,7 +389,6 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
 
   btnDummy(){
     if( !this.el ) return;
-    console.log('btnDummy', name);
     this.el.reset();
   }
 }

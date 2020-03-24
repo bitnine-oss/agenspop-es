@@ -1,6 +1,7 @@
 package net.bitnine.agenspop;
 
 import net.bitnine.agenspop.config.properties.ElasticProperties;
+import net.bitnine.agenspop.config.properties.FrontProperties;
 import net.bitnine.agenspop.config.properties.ProductProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
-@EnableConfigurationProperties({ ElasticProperties.class, ProductProperties.class })
+@EnableConfigurationProperties({ ElasticProperties.class, ProductProperties.class, FrontProperties.class})
 public class AgenspopApplication {
 
 	public static void main(String[] args) {

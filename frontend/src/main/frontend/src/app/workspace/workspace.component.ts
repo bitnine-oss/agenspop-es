@@ -89,7 +89,9 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   changeScreenMode($event){
-    console.log('** screenMode change '+this.screenMode+' to ', $event);
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('** screenMode change '+this.screenMode+' to', $event);
+
     this.screenMode = $event;
     this.gSearch = this.screenMode == 'webgl' ? this.gEl : this.gCy;
   }
@@ -103,7 +105,11 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   actionEvent($event:IEvent){    // { type: show/hide, data: { index, id } }
-    // console.log('actionEvent on '+this.screenMode, $event);
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ){
+      if( $event.type != 'spinner' ) console.log('actionEvent on '+this.screenMode+':', $event);
+    }
+
     if( $event.type == 'property-show' ){
       // let target = $event.data.index == 'v' ? this.vids.get($event.data.id) : this.eids.get($event.data.id);
       // if( target ) this.propertyComponent.showPanel(target);
@@ -131,7 +137,6 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   readyEvent($event:IEvent){
-    // console.log('readyEvent on '+this.screenMode, $event);
     if( $event.type == 'node-labels' ){
       setTimeout(()=>{ this.dispLabels.nodes = [...$event.data]; }, 2);
     }
@@ -250,7 +255,9 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
       // STEP 4) activate target screen
       this.changeScreenMode('webgl');
-      console.log('loadDatasource', this.g);
+
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('loadDatasource', this.g);
     });
   }
 
@@ -261,7 +268,8 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
     let queries:Observable<any>[] = [labels$];
     for( let stmt of stmts ){
-      console.log('queryByGremlin:', stmt);
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('queryByGremlin:', stmt);
       queries.push( this.apApiService.gremlinQuery(stmt) );
     }
 
@@ -313,7 +321,9 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
         // STEP 4) activate target screen
         this.changeScreenMode('webgl');
-        console.log('loadQueryByGremlin', this.gEl);
+
+        // for DEBUG
+        if( localStorage.getItem('debug')=='true' ) console.log('loadQueryByGremlin', this.gEl);
       });
     });
   }
@@ -324,7 +334,8 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
     let queries:Observable<any>[] = [labels$];
     for( let stmt of stmts ){
-      console.log('queryByCypher:', datasource, stmt);
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('queryByCypher:', datasource, stmt);
       queries.push( this.apApiService.cypherQuery(datasource, stmt) );
     }
 
@@ -376,7 +387,9 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
         // STEP 4) activate target screen
         this.changeScreenMode('webgl');
-        console.log('loadQueryByCypher', this.gEl);
+
+        // for DEBUG
+        if( localStorage.getItem('debug')=='true' ) console.log('loadQueryByCypher', this.gEl);
       });
     });
   }

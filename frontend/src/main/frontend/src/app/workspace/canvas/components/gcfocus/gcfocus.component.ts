@@ -42,7 +42,7 @@ export class GcFocusComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(public modal: NgbActiveModal) { }
 
   ngOnInit() {
-    console.log('  - root:', this.root.json());
+    // console.log('  - root:', this.root.json());
     this.jsons = this.getElementsJson(this.root);
   }
   ngAfterViewInit(){
@@ -114,10 +114,8 @@ export class GcFocusComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // cytoscape.warnings(false);                 // ** for PRODUCT
+    cytoscape.warnings(false);                 // ** for PRODUCT
     this.gcy = window['gcy'] = cytoscape(config);
-    console.log(`** canvas start : nodes=${this.gcy.nodes().size()}, edges=${this.gcy.edges().size()}`, this.groot);
-
   }
 
   private setStyleNode(e:any){

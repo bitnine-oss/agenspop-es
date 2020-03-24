@@ -28,7 +28,6 @@ export class GcModalComponent implements OnInit {
   constructor(public modal: NgbActiveModal) { }
 
   ngOnInit() {
-    console.log('GcModalComponent OnInit:', this.option);
     if( this.option ){
       this.methodSelected = this.option.method;
       if( this.methodSelected == 'centrality' ) this.centralitySelected = this.option.data;
@@ -41,9 +40,8 @@ export class GcModalComponent implements OnInit {
 
   onChangeMethod(value){
     this.methodSelected = value;
-    // console.log('onChangeMethod', value);
     if( value == 'centrality' ){
-      this.labelSelected = { name: SELECT_NONE };      
+      this.labelSelected = { name: SELECT_NONE };
       this.keys = [];
       this.keySelected = 'SELECT_NONE';
     }
@@ -54,12 +52,10 @@ export class GcModalComponent implements OnInit {
 
   onChangeFunction(item){
     this.centralitySelected = item;
-    // console.log('onChangeFunction', item);
   }
 
   onChangeLabel(item:ILabel){
     this.labelSelected = item;
-    // console.log('onChangeLabel', item);
 
     let keys = new Set<string>();
     for( let e of item.elements ){
@@ -71,7 +67,6 @@ export class GcModalComponent implements OnInit {
 
   onChangeKey(item){
     this.keySelected = item;
-    // console.log('onChangeKey', item);
   }
 
   close(state:boolean){

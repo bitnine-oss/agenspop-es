@@ -11,4 +11,4 @@ echo $jarfile
   }
 
 echo "Run target jar: $jarfile ($cfgname)"
-java -jar $jarfile --spring.config.name=$cfgname
+java -Xms2g -Xmx2g -jar $jarfile --spring.config.name=$cfgname

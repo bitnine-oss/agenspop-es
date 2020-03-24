@@ -28,7 +28,7 @@ export class GraphContraction {
       this.components = this.split_components(this.elements);
     else
       this.components = this.split_components_with_label(this.elements, option.data.label);
-    console.log('1) split_components', this.components);
+    // console.log('1) split_components', this.components);
 
     // make singles in-visible
     this.singles.style('display','none');
@@ -46,7 +46,7 @@ export class GraphContraction {
     this.topRank = this.set_ranks(ranks);
     ranks = ranks.filter(x=>x);   // update to not-empty array
     this.currRank = -1;           // reset currRank
-    console.log('3) set_quanitle', this.topRank, ranks);
+    // console.log('3) set_quanitle', this.topRank, ranks);
 
     // 4) make bins as array of ranks by each component : [ component0[ rank0, rank1, ... ], component1, ... ]
     //    - just composed of nodes
@@ -54,7 +54,7 @@ export class GraphContraction {
       this.bins = this.make_bins_by_centrality(this.components, ranks);
     else
       this.bins = this.make_bins_by_labelValue(this.components, ranks, option.data);
-    console.log('4) make_bins', this.bins);
+    // console.log('4) make_bins', this.bins);
 
     // this.seeds = this.get_seeds_by_centrality(this.components);
     // this.exclude_seeds_from_ranks(this.ranks, this.seeds);
@@ -277,7 +277,8 @@ export class GraphContraction {
         links.push( link );
       }
       else{
-        console.log('CANNOT make_link_to_higher', rankIndex, e.id(), e.scratch());
+        // for DEBUG
+        if( localStorage.getItem('debug')=='true' ) console.log('CANNOT make_link_to_higher', rankIndex, e.id(), e.scratch());
       }
     });
     components[componentIndex] = component;   // update with new links
@@ -366,7 +367,8 @@ export class GraphContraction {
       component = component.union(link);
     }
     else{
-      console.log('CANNOT connect_fragment', rankIndex, target.id(), target.scratch());
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('CANNOT connect_fragment', rankIndex, target.id(), target.scratch());
     }
     components[componentIndex] = component;   // update with new links
     return link;
@@ -387,7 +389,9 @@ export class GraphContraction {
   contraction(){
     if( this.currRank == this.topRank-1 ) return;
     this.currRank += 1;
-    console.log('graph::contraction', this.currRank);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('graph::contraction', this.currRank);
 
     let aggLinks = [];
     // each component
@@ -400,7 +404,9 @@ export class GraphContraction {
         // currRank == ranks.length-1(최상위) 이면, 같은 components 의 seed 로 연결
         let higher = this.getHigherNeighbor(component, e);
         if( !higher ){    // null => not found
-          console.log('WARN: cannot find higher neighbor than itself', this.currRank, e.id(), e.connectedEdges().size(), e);
+          // for DEBUG
+          if( localStorage.getItem('debug')=='true' ) console.log('WARN: cannot find higher neighbor than itself', this.currRank, e.id(), e.connectedEdges().size(), e);
+
           higher = this.bins[i][this.topRank];
         }
 
@@ -439,12 +445,17 @@ export class GraphContraction {
         if( links.length > 0 ) aggLinks = aggLinks.concat(links);
       }
     }
-    if( aggLinks.length > 0 ) console.log('create gclinks:', aggLinks.length);
+    if( aggLinks.length > 0 ){
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('create gclinks:', aggLinks.length);
+    }
   }
 
   expansion(){
     if( this.currRank < 0 ) return;
-    console.log('graph::expansion', this.currRank);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('graph::expansion', this.currRank);
 
     // each component
     for( let i=0; i<this.components.length; i+=1 ){
@@ -461,7 +472,10 @@ export class GraphContraction {
 
       // remove higher links
       let links = this.cy.edges('.gclink').filter(e=>e.scratch('_rank')>this.currRank).remove();
-      if( links.size() > 0 ) console.log('remove gclinks:', links.size() );
+      if( links.size() > 0 ){
+        // for DEBUG
+        if( localStorage.getItem('debug')=='true' ) console.log('remove gclinks:', links.size() );
+      }
 
       // remove class : gcunit
       component.nodes('.gcunit').forEach(e=>{

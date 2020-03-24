@@ -196,7 +196,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(){
-    console.log('** canvas destroy');
     // https://atomiks.github.io/tippyjs/methods/#destroy
     if( this.cy ){
       this.cy.nodes().forEach(e=>{
@@ -234,7 +233,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadGraph(g:IGraph){
-    console.log('loadGraph', g);
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('loadGraph', g);
+
     let pan = g.hasOwnProperty('pan') ? g['pan'] : { x:0, y:0 };
     let config:any = Object.assign( _.cloneDeep(CY_CONFIG), {
       container: this.divCy.nativeElement,
@@ -258,7 +259,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cyInit(config:any){
-    // cytoscape.warnings(false);                 // ** for PRODUCT
+    cytoscape.warnings(false);                 // ** for PRODUCT : custom wheel sensitive
     this.cy = window['cy'] = cytoscape(config);
     console.log(`** canvas start : nodes=${this.cy.nodes().size()}, edges=${this.cy.edges().size()}`, this.g);
 
@@ -286,7 +287,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     // right-button click : context-menu on node
     cy.on('cxttap', (e)=>{
       if( e.target === cy ){
-        // console.log('cxttap::bg', e.target);
         this.contextMenuService.show.next({
           anchorElement: cy.popperRef({renderedPosition: () => ({
             x: e.originalEvent.offsetX-5, y: e.originalEvent.offsetY-5 }),}),
@@ -298,7 +298,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       // **NOTE: ngx-contextmenu is FOOLISH! ==> do change another!
       else if( e.target.isNode() ){
         this.listVertexNeighbors(e.target, ()=>{
-          // console.log('cxttap::node', e.target);
           this.contextMenuService.show.next({
             anchorElement: e.target.popperRef(),
             contextMenu: this.cyMenu,
@@ -329,7 +328,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
             cy._private.emitter.$customFn({ type: 'idle', data: e.target });
           }                         // click node or edge
           else if( e.target.isNode() || e.target.isEdge() ){
-            console.log('select:', e.target._private);   // for DEBUG
             cy._private.emitter.$customFn({ type: 'ele-click', data: e.target });
           }
           this.tappedBefore = null;
@@ -341,7 +339,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     // trigger doubleTap event
     // https://stackoverflow.com/a/44160927/6811653
     cy.on('doubleTap', _.debounce( (e, originalTapEvent) => {
-      // console.log('cy::doubleTap', e, originalTapEvent);
       if( e.target !== cy && e.target.isNode() ){
         cy._private.emitter.$customFn({ type: 'node-dblclick', data: e.target });
       }
@@ -428,7 +425,10 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cyNodeDblClick(target:any){
     let e = target.size() > 1 ? target.first() : target;
-    console.log('node-dblclick', e.id(), target, this.tappedTarget, this.tappedCount);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('DblClick('+this.tappedCount+'):', e.id());
+
     if( this.tappedTarget == e ) this.tappedCount += 1;
     else{
       this.tappedCount = 1;
@@ -439,7 +439,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     for( let i=0; i<this.tappedCount; i+=1 ){
       eles = eles.union( eles.neighborhood() );
     }
-    // console.log('node-dblclick', e.id(), this.tappedCount, eles.size());
+
     eles.grabify();
     eles.select();
   }
@@ -521,9 +521,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     let others = this.lastUnhighlighted;
     this.lastHighlighted = this.lastUnhighlighted = null;
 
-    // console.log('** cyUnhighlight:', opts, nhood);
     let resetHighlight = ()=>{
-      // console.log('[1] cyUnhighlight::resetHighlight');
       nhood.removeClass('highlighted');
       nhood.forEach(e=>{
         if( e.scratch('_tippy') ) e.scratch('_tippy').hide();
@@ -531,7 +529,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     let hideOthers = ()=>{
-      // console.log('[2] cyUnhighlight::hideOthers');
       return this.promiseDelay( 125 ).then(()=>{
                 others.addClass('hidden');
                 return this.promiseDelay( 125 );
@@ -539,7 +536,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     let restorePositions = ()=>{
-      // console.log('[3] cyUnhighlight::restorePositions');
       this.cy.batch(()=>{
         others.nodes().forEach(n=>{
           n.position( _.clone(n.scratch('_pos')) );
@@ -549,7 +545,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     let showOthers = ()=>{
-      // console.log('[4] cyUnhighlight::showOthers');
       this.cy.batch(()=>{
         this.cy.elements().removeClass('hidden').removeClass('faded');
       });
@@ -582,9 +577,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     let nhood = this.lastHighlighted = node.closedNeighborhood();
     let others = this.lastUnhighlighted = this.cy.elements().not( nhood );
 
-    // console.log('** cyHighlight:', node, nhood);
     let reset = ()=>{
-      // console.log('[1] cyHighlight::reset');
       this.cy.batch(()=>{
         others.addClass('hidden');
         nhood.removeClass('hidden');
@@ -606,7 +599,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     let runLayout = ()=>{
-      // console.log('[2] cyHighlight::runLayout');
       let p = _.clone(node.scratch('_pos'));
       let l = nhood.filter(':visible').makeLayout({
         name: 'concentric', fit: false,
@@ -625,7 +617,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     let fit = ()=>{
-      // console.log('[3] cyHighlight::fit');
       return this.cy.animation({
                 fit: {
                   eles: nhood.filter(':visible'),
@@ -637,7 +628,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     let showOthersFaded = ()=>{
-      // console.log('[4] cyHighlight::showOthersFaded');
       return this.promiseDelay(250)
                 .then(()=>{
                   this.cy.batch(()=>{
@@ -666,18 +656,12 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // uiMouseDblClick(evt){
-  //   if( !this.cy ) return;
-  //   console.log('mouse-dblclick', evt);
-  // }
   uiWindowResize(data:any){
     if( !this.cy ) return;
-    // console.log('onWindowResize', data.width, data.height);
     this.cy.resize();
   }
   uiMouseWheel(data:any){
     if( !this.cy ) return;
-    // console.log('onMouseWheel :', data);
     let ZOOM_FACTOR = 1.25;
     let scope_ratio = Math.pow(ZOOM_FACTOR, Math.abs(data));
   }
@@ -685,7 +669,8 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////
 
   showEvent(event:any) {
-    console.log('showEvent', event);
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('showEvent', event);
   }
 
   private expandNeighbors(event:any, target:any, nbrIds: string[]){
@@ -747,7 +732,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         handle.run();
       });
-      console.log('** expandNeighbors: '+selector, target.id(), nodes, edges);
+
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('expandNeighbors('+selector+'):', target.id());
     });
   }
 
@@ -784,7 +771,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   selectElement(index:string, target:IElement){
-    console.log('canvas::selectElement', index, target);
     let e = this.cy.getElementById(target.data.id);
     if( e ){
       e.select();
@@ -794,7 +780,10 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectLabel(index:string, label:ILabel){
     if( !this.cy ) return;
-    console.log('selectLabel', index, label);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('selectLabel', index, label);
+
     // this.cy.$(':selected').unselect();
     Promise.resolve()
       .then( ()=>this.cy.$(':selected').unselect())
@@ -815,7 +804,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changeLayout(name:string){
     if( !this.cy ) return;
-    console.log('changeLayout', name);
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('changeLayout:', name);
+
     let eles = this.cy.elements(':visible');
     let boundingBox = undefined;
     if( this.cy.$(':selected').size() > 1 ){
@@ -881,7 +872,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     let color = event.data.color;
     let e = this.cy.getElementById((<IElement>event.data.target).data.id);
     let label:ILabel = _.find( (e.isNode() ? this.g.labels.nodes : this.g.labels.edges), {'name': e.data('label')} );
-    console.log('changeColor', color, e, label);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('changeColor', color, e, label);
 
     if( e.isNode() ){
       if( label ) label.color = color;
@@ -901,7 +894,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   changeIcon(event:IEvent){
     let e = this.cy.getElementById((<IElement>event.data.target).data.id);
     let label:ILabel = _.find( (e.isNode() ? this.g.labels.nodes : this.g.labels.edges), {'name': e.data('label')} );
-    console.log('changeIcon', event.data.icon, e, label);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('changeIcon', event.data.icon, e, label);
 
     if( e.isNode() ){
       if( label ) label['icon'] = event.data.icon;
@@ -919,11 +914,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   gcEvent(event:IEvent){
     if( event.data == 'contraction' ){
-      console.log('gcEvent:', event);
       if( this.gc ) this.gc.contraction();
     }
     else if( event.data == 'expansion' ){
-      console.log('gcEvent:', event);
       if( this.gc ) this.gc.expansion();
     }
     else if( event.data == 'config' ){
@@ -936,8 +929,10 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   gcFocusOpen(unit:any){   // node with gcunit class
-    console.log('gcFocusOpen', unit.id(), unit.scratch());
     if( !this.cy ) return;
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('gcFocusOpen', unit.id(), unit.scratch());
 
     const modalRef:NgbModalRef = this.modalService.open(GcFocusComponent, { ariaLabelledBy: 'modal-basic-title' }); // , size: 'xl'
     modalRef.componentInstance.root = unit;
@@ -945,9 +940,8 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
     modalRef.result.then(
       (result)=>{ },
-      (reason)=>{
-        console.log('gcFocus.Closed:', reason);
-      });
+      (reason)=>{ }
+    );
   }
 
   gcClear(){
@@ -967,7 +961,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
     modalRef.result.then(
       (result)=>{
-        console.log('gcModal.Closed:', result);
         this.gcOption = result.method == 'stop' ? undefined : result;
         this.readyEmitter.emit(<IEvent>{ type: 'gcmode-changed', data: result.method == 'stop' ? false : true });
 

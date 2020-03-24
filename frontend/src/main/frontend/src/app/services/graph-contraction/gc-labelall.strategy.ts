@@ -36,7 +36,7 @@ export class GcLabelAllStrategy implements GcStrategy {
     this.components = this.split_components(this.elements, label);
     // label nodes 가 많은 component 에는 temp seed 생성 => 보기 좋으라고 (데코)
     // ..
-    console.log('1) split_components='+this.components.length, this.components);
+    // console.log('1) split_components='+this.components.length, this.components);
 
     // singles 화면에서 숨기기
     this.singles.style('display','none');
@@ -55,12 +55,12 @@ export class GcLabelAllStrategy implements GcStrategy {
     ranks = ranks.filter(x=>x);           // update to not-empty array
 
     this.topRank = this.set_ranks(ranks, this.seeds);
-    console.log('3) set_quanitle', this.topRank, ranks);
+    // console.log('3) set_quanitle', this.topRank, ranks);
 
     // 4) make bins as array of ranks by each component : [ component0[ rank0, rank1, ... ], component1, ... ]
     //    - just composed of nodes
     this.bins = this.make_bins(this.components, ranks, this.seeds);
-    console.log('4) make_bins', this.bins);
+    // console.log('4) make_bins', this.bins);
 
     // this.seeds = this.get_seeds_by_centrality(this.components);
     // this.exclude_seeds_from_ranks(this.ranks, this.seeds);
@@ -112,7 +112,9 @@ export class GcLabelAllStrategy implements GcStrategy {
         // currRank == ranks.length-1(최상위) 이면, 같은 components 의 seed 로 연결
         let higher = this.getHigherNeighbor(component, e);
         if( !higher ){    // null => not found
-          console.log('WARN: cannot find higher neighbor than itself', currRank, e.id(), e.connectedEdges().size(), e);
+          // for DEBUG
+          if( localStorage.getItem('debug')=='true' ) console.log('WARN: cannot find higher neighbor than itself', currRank, e.id(), e.connectedEdges().size(), e);
+
           higher = this.bins[i][this.topRank];
         }
 
@@ -151,7 +153,10 @@ export class GcLabelAllStrategy implements GcStrategy {
         if( links.length > 0 ) aggLinks = aggLinks.concat(links);
       }
     }
-    if( aggLinks.length > 0 ) console.log('create gclinks:', aggLinks.length);
+    if( aggLinks.length > 0 ){
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('create gclinks:', aggLinks.length);
+    }
   }
 
   doExpansion(currRank:number){
@@ -170,12 +175,14 @@ export class GcLabelAllStrategy implements GcStrategy {
 
       // remove higher links
       let links = this.cy.edges('.gclink').filter(e=>e.scratch('_rank')<=this.topRank && e.scratch('_rank')>currRank).remove();
-      if( links.size() > 0 ) console.log('remove gclinks:', links.size() );
+      if( links.size() > 0 ){
+        // for DEBUG
+        if( localStorage.getItem('debug')=='true' ) console.log('remove gclinks:', links.size() );
+      }
 
       // remove class : gcunit
       component.nodes('.gcunit').forEach(e=>{
         let child_nodes = e.scratch('_child_nodes').filter(x=>x.scratch('_rank')<currRank-1);
-        // console.log('remove class: gcunit', child_nodes.size(), e.scratch('_child_nodes').map(x=>x.scratch('_rank')), e);
         if( child_nodes.size() == 0 ) e.removeClass('gcunit');
       });
     }
@@ -354,12 +361,12 @@ export class GcLabelAllStrategy implements GcStrategy {
       // create new edge
       if( higher ){
         let link = this.create_temp_link(componentIndex, rankIndex, e, higher);
-        // console.log('scan_orphans_by_contraction('+rankIndex+')', e.id(), higher.id(), link);
         component = component.union(link);
         links.push( link );
       }
       else{
-        console.log('CANNOT make_link_to_higher', rankIndex, e.id(), e.scratch());
+        // for DEBUG
+        if( localStorage.getItem('debug')=='true' ) console.log('CANNOT make_link_to_higher', rankIndex, e.id(), e.scratch());
       }
     });
     components[componentIndex] = component;   // update with new links
@@ -446,11 +453,11 @@ export class GcLabelAllStrategy implements GcStrategy {
     });
     if( higher ){
       link = this.create_temp_link(componentIndex, rankIndex, target, higher);
-      // console.log('connect_fragment('+rankIndex+')['+bigger.nodes().size()+']->['+fragment.nodes().size()+']', target.id(), higher.id(), link);
       component = component.union(link);
     }
     else{
-      console.log('CANNOT connect_fragment', rankIndex, target.id(), target.scratch());
+      // for DEBUG
+      if( localStorage.getItem('debug')=='true' ) console.log('CANNOT connect_fragment', rankIndex, target.id(), target.scratch());
     }
     components[componentIndex] = component;   // update with new links
     return link;

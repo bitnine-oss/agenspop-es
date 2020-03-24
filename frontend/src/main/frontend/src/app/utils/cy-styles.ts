@@ -424,12 +424,11 @@ export const CY_EVT_INIT:Function = function(cy:any){
       let collection = cy.$api.findNeighbors(elem, uniqLabels.slice(0), maxHops);
       connectedNodes = connectedNodes.merge( collection );
     });
-    // 5) return connectedNodes
-    // console.log( 'neighbors ==>', connectedNodes, uniqLabels, maxHops );
 
-    // 6) callback run
+    // 5) callback run
     if( callback !== undefined ) callback();
-    
+
+    // 6) return connectedNodes
     return connectedNodes;
   };
 

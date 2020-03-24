@@ -18,6 +18,14 @@ export class ApApiService {
   constructor(private _http: HttpClient) {}
 
   // meta query
+  // http://27.117.163.21:15632/api/admin/config
+  public loadConfig() {
+    let uri = this.apiUrl+'/api/admin/config';
+    let headers = new HttpHeaders({'Content-Type': 'application/json'});
+    return this._http.get<any>( uri, { headers : headers });
+  }
+
+  // meta query
   // http://27.117.163.21:15632/api/admin/graphs
   public findDatasources() {
     let uri = this.apiUrl+'/api/admin/graphs';

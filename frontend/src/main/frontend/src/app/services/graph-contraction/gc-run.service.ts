@@ -34,14 +34,18 @@ export class GcRunService {
   contraction(){
     if( this.currRank+1 >= this.topRank ) return;
     this.currRank += 1;
-    console.log('graph::contraction', this.currRank);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('graph::contraction', this.currRank);
 
     this.strategy.doContraction(this.currRank);
   }
 
   expansion(){
     if( this.currRank < 0 ) return;
-    console.log('graph::expansion', this.currRank);
+
+    // for DEBUG
+    if( localStorage.getItem('debug')=='true' ) console.log('graph::expansion', this.currRank);
 
     this.strategy.doExpansion(this.currRank);
     this.currRank -= 1;

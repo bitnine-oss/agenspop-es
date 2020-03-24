@@ -109,7 +109,7 @@ export class HeaderComponent implements OnInit {
         this.isSearching = true;
 				// API: http get (query) => subscribe{ isSearching = false; ... }
 				this.searchResults = this.matchSearchMap(query);
-				console.log('searchInput::keyup', query, this.searchResults);
+				// console.log('searchInput::keyup', query, this.searchResults);
       });
 
     // Async data (ex: crop to cy-graph)
@@ -351,7 +351,6 @@ export class HeaderComponent implements OnInit {
 	}
 
   openGCConfig(){
-    console.log('graphContraction Config::open', this.gcMode);
     this.gcEmitter.emit(<IEvent>{type: 'gc', data: 'config'});
   }
 
