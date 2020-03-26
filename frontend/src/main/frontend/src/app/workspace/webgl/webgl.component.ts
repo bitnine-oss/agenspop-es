@@ -72,6 +72,9 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild("el", {read: ElementRef, static: false}) divEl: ElementRef;
 
+  // for DEBUG : elapsedTime recoding
+  private timeLabel:string = null;
+
   ngOnInit(){
     // UI events
     this.uiEventsEmitter.asObservable()
@@ -194,6 +197,12 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
       this.el.destroy();
     }
 
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' && this.timeLabel == null ){
+      this.timeLabel = `webgl-ready`;
+      console.time(this.timeLabel);
+    }
+
     // create WebGL and save to window variable
     this.el = window['el'] = new ElGrapho({
       container: this.divEl.nativeElement,
@@ -205,7 +214,14 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
       arrows: true,
       debug: true
     });
-    console.log(`** webgl start : model[nodes=${model.nodes.length}, edges=${model.edges.length}]`, this.el);
+
+    // for DEBUG : elapsedTime recording end
+    if( localStorage.getItem('debug')=='true' ){
+      console.timeEnd(this.timeLabel);
+      console.log(`  => nodes(${model.nodes.length}), edges(${model.edges.length})`);
+      this.timeLabel = null;
+    }
+
     // make linking el-events to inner
     this.el.emitter$ = (e)=>this.elEventsMapper(e);
 
@@ -349,8 +365,11 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
   changeLayout(name:string){
     if( !this.el ) return;
 
-    // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log('changeLayout', name);
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' ){
+      this.timeLabel = `webgl-layout[${name}]`;
+      console.time(this.timeLabel);
+    }
 
     let model;
     try{
@@ -369,6 +388,10 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
         default:  // ForceDirected
             model = ElGrapho.layouts.ForceDirected(this.model);
       }
+
+      // for DEBUG : elapsedTime recording end
+      //   ==> will stop on elInit()
+
       this.elInit(model);
     }
     catch(e){

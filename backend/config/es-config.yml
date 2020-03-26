@@ -37,3 +37,4 @@ agens:
     hello-msg: agenspop-elasticgraph v1.0 (since 2019-08-01)
   front:
     debug: false                # display elapsedTimes of Visualization(Workspace) about loading, rendering
+    init-mode: webgl            # initial screen-mode: webgl(default) or canvas

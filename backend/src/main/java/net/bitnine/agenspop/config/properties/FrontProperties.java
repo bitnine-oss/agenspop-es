@@ -17,11 +17,13 @@ import java.util.stream.Stream;
 @ConfigurationProperties(prefix = "agens.front")
 public class FrontProperties {
 
-    private boolean debug = false;      // default value
+    private boolean debug = false;          // default value
+    private String initMode = "webgl";    // default value
 
     public Map<String,Object> toMap(){
         return Stream.of(
-                new AbstractMap.SimpleImmutableEntry<>("debug", debug))
+                new AbstractMap.SimpleImmutableEntry<>("debug", debug),
+                new AbstractMap.SimpleImmutableEntry<>("init-mode", initMode))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

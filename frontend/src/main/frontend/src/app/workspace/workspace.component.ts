@@ -25,7 +25,7 @@ g.V().hasLabel('order').sample(300);`;
 })
 export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
-  screenMode:string = 'webgl';
+  screenMode:string = 'init';
   undoable:boolean = false;
   redoable:boolean = false;
   gcMode:boolean = false;
@@ -57,6 +57,9 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   dispLayouts:string[] = [];
   // 'webgl': ['Chord','Cluster','ForceDirected','Hairball','RadialTree','Tree'],
   // 'canvas':['bread-first', 'circle', 'cose', 'cola', 'klay', 'dagre', 'cose-bilkent', 'concentric', 'euler']
+
+  // for DEBUG : elapsedTime recoding
+  private timeLabel:string = null;
 
   constructor(
     private apApiService: ApApiService,
@@ -90,7 +93,7 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
   changeScreenMode($event){
     // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log('** screenMode change '+this.screenMode+' to', $event);
+    if( localStorage.getItem('debug')=='true' ) console.log(`** screenMode change '${this.screenMode}' to '${$event}'`);
 
     this.screenMode = $event;
     this.gSearch = this.screenMode == 'webgl' ? this.gEl : this.gCy;
@@ -214,9 +217,21 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
     this.spinner.show();
 
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' ){
+      this.timeLabel = `loadDatasource[${datasource}]`;
+      console.time(this.timeLabel);
+    }
+
     // **NOTE: multiple http request with rxjs
     // https://coryrylan.com/blog/angular-multiple-http-requests-with-rxjs
     forkJoin([labels$, nodes$, edges$]).subscribe(results => {
+      // for DEBUG : elapsedTime recording end
+      if( localStorage.getItem('debug')=='true' ){
+        console.timeEnd(this.timeLabel);
+        console.log(`  => nodes(${(<IElement[]>results[1]).length}), edges(${(<IElement[]>results[2]).length})`);
+      }
+
       // STEP0) make dictionary of nodes, edges
       this.vids = new Map<string,IElement>( (<IElement[]>results[1]).map((e,i)=>{
                   e.scratch['_idx'] = i;    // for elgrapho
@@ -245,20 +260,13 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
       // for DEBUG
       window['agens'] = this.g;
 
-      // STEP5) copy GraphData to target screen
-      this.gEl = this.g;
-      // this.gEl = <IGraph>{
-      //   datasource: datasource,
-      //   nodes: [...this.g.nodes],
-      //   edges: [...this.g.edges],
-      //   labels: { nodes: [...this.g.labels.nodes], edges: [...this.g.labels.edges] }
-      // };
-
-      // STEP 4) activate target screen
-      this.changeScreenMode('webgl');
-
-      // for DEBUG
-      if( localStorage.getItem('debug')=='true' ) console.log('loadDatasource', this.g);
+      // STEP 5) activate target screen
+      this.gCy = this.gEl = this.g;
+      if( localStorage.getItem('init-mode')=='canvas' ){
+        this.changeScreenMode('canvas');
+      } else {
+        this.changeScreenMode('webgl');
+      }
     });
   }
 
@@ -311,20 +319,14 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
         // for DEBUG
         window['agens'] = this.g;
 
-        // STEP5) copy GraphData to target screen
-        this.gEl = this.g;
-        // this.gEl = <IGraph>{
-        //   datasource: datasource,
-        //   nodes: [...this.g.nodes],
-        //   edges: [...this.g.edges],
-        //   labels: { nodes: [...this.g.labels.nodes], edges: [...this.g.labels.edges] }
-        // };
-
-        // STEP 4) activate target screen
-        this.changeScreenMode('webgl');
-
-        // for DEBUG
-        if( localStorage.getItem('debug')=='true' ) console.log('loadQueryByGremlin', this.gEl);
+        // STEP 5) activate target screen
+        this.gCy = this.gEl = this.g;
+        if( localStorage.getItem('init-mode')=='canvas' ){
+          this.changeScreenMode('canvas');
+        } else {
+          this.changeScreenMode('webgl');
+        }
+        // console.log('loadQueryByGremlin', this.gEl);
       });
     });
   }
@@ -377,20 +379,14 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
         // for DEBUG
         window['agens'] = this.g;
 
-        // STEP5) copy GraphData to target screen
-        this.gEl = this.g;
-        // this.gEl = <IGraph>{
-        //   datasource: datasource,
-        //   nodes: [...this.g.nodes],
-        //   edges: [...this.g.edges],
-        //   labels: { nodes: [...this.g.labels.nodes], edges: [...this.g.labels.edges] }
-        // };
-
-        // STEP 4) activate target screen
-        this.changeScreenMode('webgl');
-
-        // for DEBUG
-        if( localStorage.getItem('debug')=='true' ) console.log('loadQueryByCypher', this.gEl);
+        // STEP 5) activate target screen
+        this.gCy = this.gEl = this.g;
+        if( localStorage.getItem('init-mode')=='canvas' ){
+          this.changeScreenMode('canvas');
+        } else {
+          this.changeScreenMode('webgl');
+        }
+        // console.log('loadQueryByCypher', this.gEl);
       });
     });
   }

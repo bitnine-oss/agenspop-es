@@ -167,6 +167,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private gcOption:any;
 
+  // for DEBUG : elapsedTime recoding
+  private timeLabel:string = null;
+
   constructor(
     private cdr: ChangeDetectorRef,
     private apApiService: ApApiService,
@@ -260,8 +263,31 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cyInit(config:any){
     cytoscape.warnings(false);                 // ** for PRODUCT : custom wheel sensitive
+
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' ){
+      this.timeLabel = `canvas-ready`;
+      console.time(this.timeLabel);
+    }
+
+    if( localStorage.getItem('init-mode')=='canvas' ){
+      config.layout = { name: "random"
+        , fit: true, padding: 100, randomize: false, animate: false, positions: undefined
+        , zoom: undefined, pan: undefined, ready: undefined, stop: undefined
+      };
+    }
     this.cy = window['cy'] = cytoscape(config);
-    console.log(`** canvas start : nodes=${this.cy.nodes().size()}, edges=${this.cy.edges().size()}`, this.g);
+
+    // **NOTE : 여기서 측정하는 것이 ready()에서 측정하는 것보다 1초+ 정도 느리다.
+    //      ==> ready() 에서 모든 nodes, edges 들의 style 처리후 빠져나옴
+    //      ==> 이 시점에서 화면상에 그래프는 보이지 않음. 브라우저에서 실제 그리는 시간이 추가로 소요됨 (측정불가. 도구가 없음)
+
+    // for DEBUG : elapsedTime recording end
+    if( localStorage.getItem('debug')=='true' ){
+      console.timeEnd(this.timeLabel);
+      console.log(`  => nodes(${this.cy.nodes().size()}), edges(${this.cy.edges().size()})`);
+      this.timeLabel = null;
+    }
 
     // undo-redo
     this.ur = this.cy.undoRedo(UR_CONFIG);
@@ -804,8 +830,6 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changeLayout(name:string){
     if( !this.cy ) return;
-    // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log('changeLayout:', name);
 
     let eles = this.cy.elements(':visible');
     let boundingBox = undefined;
@@ -814,12 +838,28 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       boundingBox = eles.boundingBox();
     }
 
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' ){
+      this.timeLabel = `canvas-layout[${name}]`;
+      console.time(this.timeLabel);
+    }
+
+    // let fit_option = localStorage.getItem('debug')=='true' ? false : true;
+    let animate_option = localStorage.getItem('debug')=='true' ? false : 'end';
+
     let handle = eles.layout({
       name: name, boundingBox: boundingBox,
-      fit: true, padding: 100, animate: 'end', animationDuration: 500,
+      fit: true, padding: 100, animate: animate_option, animationDuration: 500,
       minNodeSpacing: 20, avoidOverlap: true, avoidOverlapPadding: 20,
       spacingFactor: 1.5, nodeDimensionsIncludeLabels: false,
       ready: undefined, stop: (l)=>{
+        // for DEBUG : elapsedTime recording end
+        if( localStorage.getItem('debug')=='true' ){
+          console.timeEnd(this.timeLabel);
+          console.log(`  => nodes(${eles.nodes().size()}), edges(${eles.edges().size()})`);
+          this.timeLabel = null;
+        }
+
         for( let e of eles.toArray() ){
           e.scratch('_pos', _.clone(e._private.position));
         }
