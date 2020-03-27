@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "product": "ng build --prod",
+    "product": "npx npm-force-resolutions && npm i --no-audit && ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -51,11 +51,10 @@
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.803.17",
+    "@angular-devkit/build-angular": "~0.803.25",
     "@angular/cli": "^8.3.25",
     "@angular/compiler-cli": "~8.2.11",
     "@angular/language-service": "~8.2.11",
-    "@babel/plugin-proposal-numeric-separator": "^7.8.3",
     "@types/d3-scale": "2.1.1",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
@@ -69,7 +68,6 @@
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.4.0",
     "ngx-typeahead": "^6.2.0",
-    "npm-force-resolutions": "0.0.3",
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
