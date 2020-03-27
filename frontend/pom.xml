@@ -24,8 +24,8 @@
                 <version>1.7.6</version>
 
                 <configuration>
-                    <nodeVersion>v10.15.1</nodeVersion>
-                    <npmVersion>6.13.7</npmVersion>
+                    <nodeVersion>v12.16.1</nodeVersion>
+                    <npmVersion>6.13.4</npmVersion>
                     <nodeDownloadRoot>http://nodejs.org/dist/</nodeDownloadRoot>
                     <!--<nodeDownloadRoot>https://cnpmjs.org/mirrors/node/latest/</nodeDownloadRoot>-->
                     <npmDownloadRoot>http://registry.npmjs.org/npm/-/</npmDownloadRoot>
