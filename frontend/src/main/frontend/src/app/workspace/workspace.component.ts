@@ -278,8 +278,14 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
     let queries:Observable<any>[] = [labels$];
     for( let stmt of stmts ){
       // for DEBUG
-      if( localStorage.getItem('debug')=='true' ) console.log('queryByGremlin:', stmt);
+      if( localStorage.getItem('debug')=='true' ) console.log('gremlin:', stmt);
       queries.push( this.apApiService.gremlinQuery(stmt) );
+    }
+
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' ){
+      this.timeLabel = `loadDatasource[${datasource}]`;
+      console.time(this.timeLabel);
     }
 
     forkJoin(queries).subscribe(results => {
@@ -290,6 +296,12 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
       }
       let nodes:IElement[] = Array.from(nodesSet.values());
       this.apApiService.findEdgesOfVertices(datasource, nodes.map(e=>e.data.id)).subscribe(edges=>{
+
+        // for DEBUG : elapsedTime recording end
+        if( localStorage.getItem('debug')=='true' ){
+          console.timeEnd(this.timeLabel);
+          console.log(`  => nodes(${(<IElement[]>nodes).length}), edges(${(<IElement[]>edges).length})`);
+        }
 
         // STEP0) make dictionary of nodes, edges
         this.vids = new Map<string,IElement>( (<IElement[]>nodes).map((e,i)=>{
@@ -338,8 +350,14 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
     let queries:Observable<any>[] = [labels$];
     for( let stmt of stmts ){
       // for DEBUG
-      if( localStorage.getItem('debug')=='true' ) console.log('queryByCypher:', datasource, stmt);
+      if( localStorage.getItem('debug')=='true' ) console.log('cypher:', stmt);
       queries.push( this.apApiService.cypherQuery(datasource, stmt) );
+    }
+
+    // for DEBUG : elapsedTime recording start
+    if( localStorage.getItem('debug')=='true' ){
+      this.timeLabel = `loadDatasource[${datasource}]`;
+      console.time(this.timeLabel);
     }
 
     forkJoin(queries).subscribe(results => {
@@ -350,6 +368,12 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
       }
       let nodes:IElement[] = Array.from(nodesSet.values());
       this.apApiService.findEdgesOfVertices(datasource, nodes.map(e=>e.data.id)).subscribe(edges=>{
+
+        // for DEBUG : elapsedTime recording end
+        if( localStorage.getItem('debug')=='true' ){
+          console.timeEnd(this.timeLabel);
+          console.log(`  => nodes(${(<IElement[]>nodes).length}), edges(${(<IElement[]>edges).length})`);
+        }
 
         // STEP0) make dictionary of nodes, edges
         this.vids = new Map<string,IElement>( (<IElement[]>nodes).map((e,i)=>{
