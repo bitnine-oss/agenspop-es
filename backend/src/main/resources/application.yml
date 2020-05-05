@@ -19,10 +19,10 @@ agens:
     base-path: /api
     query-timeout: 600000       # 1000 ms = 1 sec
   elasticsearch:
-    host: 27.117.163.21
-    port: 15619
-#    host: 192.168.0.54
-#    port: 8087
+#    host: 27.117.163.21
+#    port: 15619
+    host: 192.168.0.20
+    port: 9200
     username:
     password:
     scroll-limit: -1            # -1(unlimit) or more than 2500

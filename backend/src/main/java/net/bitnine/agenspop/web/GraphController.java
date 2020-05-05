@@ -70,6 +70,35 @@ public class GraphController {
     ///////////////////////////////////////////
 
     // http://localhost:8080/api/graph/gremlin?q=modern_g.V()
+    @PostMapping(value="/gremlin"
+            , consumes="application/json; charset=UTF-8"
+            , produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> execGremlin(
+            @RequestBody Map<String,Object> param
+    ) throws Exception {
+        if( !param.containsKey("datasource") || !param.containsKey("q") )
+            throw new IllegalArgumentException("parameter missing : datasource, q");
+
+        String datasource = param.get("datasource").toString();
+        String script = param.get("q").toString();
+        if( datasource.isEmpty() || script.isEmpty() )
+            throw new IllegalArgumentException("parameter wrong value : datasource, q");
+
+        script = datasource+"_"+script;
+
+        Stream<Object> stream = Stream.empty();
+        try {
+            CompletableFuture<?> future = gremlin.runGremlin(script);
+            CompletableFuture.allOf(future).join();
+            stream = (Stream<Object>) future.get();
+        }catch (Exception ex){
+            System.out.println("** ERROR: runGremlin ==> " + ex.getMessage());
+        }
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , stream );
+    }
+
+    // http://localhost:8080/api/graph/gremlin?q=modern_g.V()
     @GetMapping(value="/gremlin", produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> runGremlin(
             @RequestParam("q") String script
