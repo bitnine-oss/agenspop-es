@@ -26,6 +26,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -637,6 +640,20 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     public Stream<BaseEdge> findEdgesOfVertices(String datasource, final String[] vids){
         try{
             return edges.streamByDatasourceWithVertices(datasource, vids).map(r->(BaseEdge)r);
+        } catch(Exception e){ return Stream.empty(); }
+    }
+
+    // 1) src, dst 의 id SET 만들고
+    // 2) vertices 로부터 id 매칭 리스트 반환
+    public Stream<BaseVertex> findVerticesOfEdges(String datasource, final String[] eids){
+        try{
+            Set<String> vids = ConcurrentHashMap.newKeySet();
+            edges.streamByDatasourceAndIds(datasource, eids).forEach(r->{
+                vids.add(r.getSrc());
+                vids.add(r.getDst());
+            });
+            String[] arrayIds = new String[vids.size()];
+            return vertices.streamByDatasourceAndIds(datasource, vids.toArray(arrayIds)).map(r->(BaseVertex)r);
         } catch(Exception e){ return Stream.empty(); }
     }
 

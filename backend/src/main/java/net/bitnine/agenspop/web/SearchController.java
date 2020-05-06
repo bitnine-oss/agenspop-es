@@ -140,6 +140,11 @@ curl -X GET "localhost:8080/api/search/modern/e/connected?q=modern_2,modern_3,mo
                 , vids.size() == 0 ? Stream.empty() :
                         base.findEdgesOfVertices(datasource, vids.toArray(array)) );
     }
+/*
+body: {
+    "q": ["modern_1","modern_3","modern_6"]
+}
+ */
     @PostMapping(value="/{datasource}/e/connected"
             , consumes="application/json; charset=UTF-8"
             , produces="application/stream+json; charset=UTF-8")
@@ -151,6 +156,24 @@ curl -X GET "localhost:8080/api/search/modern/e/connected?q=modern_2,modern_3,mo
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
                 , param.get("q").size() == 0 ? Stream.empty() :
                         base.findEdgesOfVertices(datasource, param.get("q").toArray(array)) );
+    }
+
+/*
+body: {
+	"q": ["modern_7","modern_8","modern_9"]
+}
+ */
+    @PostMapping(value="/{datasource}/v/connected"
+            , consumes="application/json; charset=UTF-8"
+            , produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findV_Connected_Post(
+            @PathVariable String datasource,
+            @RequestBody Map<String,List<String>> param
+    ) throws Exception {
+        String[] array = new String[param.get("q").size()];
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , param.get("q").size() == 0 ? Stream.empty() :
+                        base.findVerticesOfEdges(datasource, param.get("q").toArray(array)) );
     }
 
 
