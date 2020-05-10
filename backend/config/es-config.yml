@@ -13,6 +13,9 @@ spring:
   resources:
     cache:
       period: 3600              # seconds
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"    # fixed in codes
+    time-zone: Asia/Seoul
 
 agens:
   api:

@@ -29,6 +29,9 @@ public final class ElasticProperty implements BaseProperty {
     public String type(){ return type; }
 
     @Override
+    public String valueOf(){ return value; }
+
+    @Override
     public Object value() throws NoSuchElementException {
         ObjectMapper mapper = new ObjectMapper();
         if( value == null || value.length() == 0 || value.isEmpty() ){

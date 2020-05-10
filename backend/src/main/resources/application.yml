@@ -13,6 +13,9 @@ spring:
   resources:
     cache:
       period: 3600              # seconds
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"    # fixed in codes
+    time-zone: Asia/Seoul
 
 agens:
   api:
@@ -26,8 +29,8 @@ agens:
     username:
     password:
     scroll-limit: -1            # -1(unlimit) or more than 2500
-    vertex-index: elasticvertex
-    edge-index: elasticedge
+    vertex-index: agensvertex
+    edge-index: agensedge
     edge-validation: false      # if true, check valid edge on each request (make slow)
     index-shards: 1             # when create index, apply to setting
     index-replicas: 0           # when create index, apply to setting

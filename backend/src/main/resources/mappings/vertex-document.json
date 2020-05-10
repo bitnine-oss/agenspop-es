@@ -1,6 +1,7 @@
 {
   "dynamic": false,
   "properties":{
+    "created"    : { "type" : "date", "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis" },
     "datasource" : { "type" : "keyword" },
     "id"         : { "type" : "keyword" },
     "label"      : { "type" : "keyword" },

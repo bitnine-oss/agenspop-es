@@ -1,16 +1,18 @@
 package net.bitnine.agenspop.elasticgraph.util;
 
 import net.bitnine.agenspop.basegraph.model.BaseEdge;
+import net.bitnine.agenspop.basegraph.model.BaseProperty;
 import net.bitnine.agenspop.elasticgraph.model.ElasticElement;
+import net.bitnine.agenspop.elasticgraph.model.ElasticProperty;
 import net.bitnine.agenspop.elasticgraph.repository.ElasticVertexService;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,6 +20,43 @@ import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 
 public final class ElasticHelper {
+
+    public static final String createdTag = "_$$created";
+    public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static final String date2str(LocalDateTime value){
+        if( value == null ) return null;
+        return value.format(createdFormatter);
+    }
+
+    public static final boolean checkDateformat(String value){
+        if( value == null ) return false;
+        final DateTimeFormatter dtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        try {
+            LocalDateTime date = LocalDateTime.parse(value, dtformatter);
+            return date != null ? true : false;
+        }catch (DateTimeParseException e){
+            return false;
+        }
+    }
+
+    public static String getCreatedDate(final List<ElasticProperty> properties) {
+        for(BaseProperty property : properties) {
+            if( property.key().equals(createdTag) && checkDateformat(property.valueOf()) ){
+                return property.valueOf();
+            }
+        }
+        return null;
+    }
+
+    public static void setCreatedDate(ElasticElement element){
+        if( element.getCreated() != null ) return;
+        String created = getCreatedDate(element.getProperties());
+        if( created == null ){  // if not exists, set NOW() to created
+            element.setCreated( date2str(LocalDateTime.now()) );    // set to field
+            element.setProperty( element.getCreatedProperty() );    // add as property
+        }
+    }
 
     // **NOTE: stream 은 재사용이 안됨!! 특히나 무한 리스트인 경우
     //      - .peek() 함수를 사용하려 했으나 vid 필터링 과정 때문에 안됨

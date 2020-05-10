@@ -6,6 +6,7 @@ public interface BaseProperty {
 
     String key();
     String type();
+    String valueOf();
     Object value() throws NoSuchElementException;
 
     default boolean canRead() {
@@ -35,6 +36,10 @@ public interface BaseProperty {
         }
         @Override
         public String type() throws NoSuchElementException {
+            throw new NoSuchElementException("BaseEmptyProperty");
+        }
+        @Override
+        public String valueOf() throws NoSuchElementException {
             throw new NoSuchElementException("BaseEmptyProperty");
         }
         @Override

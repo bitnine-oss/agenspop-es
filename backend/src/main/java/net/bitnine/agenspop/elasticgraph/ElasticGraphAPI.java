@@ -12,6 +12,7 @@ import net.bitnine.agenspop.basegraph.model.BaseProperty;
 import net.bitnine.agenspop.basegraph.model.BaseVertex;
 import net.bitnine.agenspop.config.properties.ElasticProperties;
 import net.bitnine.agenspop.elasticgraph.model.ElasticEdge;
+import net.bitnine.agenspop.elasticgraph.model.ElasticElement;
 import net.bitnine.agenspop.elasticgraph.model.ElasticProperty;
 import net.bitnine.agenspop.elasticgraph.model.ElasticVertex;
 import net.bitnine.agenspop.elasticgraph.repository.ElasticEdgeService;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -284,12 +286,17 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     }
     @Override
     public BaseProperty createProperty(String key, Object value){
+        if( key.equals(ElasticHelper.createdTag)){
+            if( !ElasticHelper.checkDateformat(value.toString()) )
+                throw new IllegalArgumentException("Wrong date format: 'yyyy-MM-dd HH:mm:ss'");
+        }
         return new ElasticProperty(key, value);
     }
 
 
     @Override
     public boolean saveVertex(BaseVertex vertex){
+        ElasticHelper.setCreatedDate((ElasticElement)vertex);
         try{
             if( existsVertex(vertex.getId()) )
                 return vertices.updateDocument((ElasticVertex) vertex).equals("UPDATED") ? true : false;
@@ -300,6 +307,7 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     }
     @Override
     public boolean saveEdge(BaseEdge edge){
+        ElasticHelper.setCreatedDate((ElasticElement)edge);
         try{
             if( existsEdge(edge.getId()) )
                 return edges.updateDocument((ElasticEdge) edge).equals("UPDATED") ? true : false;

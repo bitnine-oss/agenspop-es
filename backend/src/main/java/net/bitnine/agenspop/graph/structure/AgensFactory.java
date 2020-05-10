@@ -2,24 +2,18 @@ package net.bitnine.agenspop.graph.structure;
 
 
 import net.bitnine.agenspop.basegraph.BaseGraphAPI;
+import net.bitnine.agenspop.elasticgraph.util.ElasticHelper;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.*;
-import org.springframework.context.index.CandidateComponentsIndexLoader;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal.Symbols.otherV;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal.Symbols.values;
-import static org.apache.tinkerpop.gremlin.structure.io.IoCore.gryo;
 
 /**
  * Helps create a variety of different toy graphs for testing and learning purposes.
@@ -86,18 +80,42 @@ e5 = v4.addEdge("created", v3, T.id, 11, "weight", 0.4f);
 e6 = v6.addEdge("created", v3, T.id, 12, "weight", 0.2f);
  */
     public static void generateModern(final AgensGraph g) {
-        final Vertex marko = g.addVertex(T.id, "modern_1", T.label, "person", "name", "marko", "age", 29, "country", "USA");
-        final Vertex vadas = g.addVertex(T.id, "modern_2", T.label, "person", "name", "vadas", "age", 27, "country", "USA");
-        final Vertex lop = g.addVertex(T.id, "modern_3", T.label, "software", "name", "lop", "lang", "java");
-        final Vertex josh = g.addVertex(T.id, "modern_4", T.label, "person", "name", "josh", "age", 32, "country", "USA");
-        final Vertex ripple = g.addVertex(T.id, "modern_5", T.label, "software", "name", "ripple", "lang", "java");
-        final Vertex peter = g.addVertex(T.id, "modern_6", T.label, "person", "name", "peter", "age", 35, "country", "USA");
-        marko.addEdge("knows", vadas, T.id, "modern_7", "weight", 0.5d);
-        marko.addEdge("knows", josh, T.id, "modern_8", "weight", 1.0d);
-        marko.addEdge("created", lop, T.id, "modern_9", "weight", 0.4d);
-        josh.addEdge("created", ripple, T.id, "modern_10", "weight", 1.0d);
-        josh.addEdge("created", lop, T.id, "modern_11", "weight", 0.4d);
-        peter.addEdge("created", lop, T.id, "modern_12", "weight", 0.2d);
+        final Vertex marko = g.addVertex(T.id, "modern_1", T.label, "person"
+                , ElasticHelper.createdTag, "2019-01-22 22:22:22"
+                , "name", "marko", "age", 29, "country", "USA");
+        final Vertex vadas = g.addVertex(T.id, "modern_2", T.label, "person"
+                , ElasticHelper.createdTag, "2019-03-22 22:22:22"
+                , "name", "vadas", "age", 27, "country", "USA");
+        final Vertex lop = g.addVertex(T.id, "modern_3", T.label, "software"
+                , ElasticHelper.createdTag, "2019-05-22 22:22:22"
+                , "name", "lop", "lang", "java");
+        final Vertex josh = g.addVertex(T.id, "modern_4", T.label, "person"
+                , ElasticHelper.createdTag, "2019-07-22 22:22:22"
+                , "name", "josh", "age", 32, "country", "USA");
+        final Vertex ripple = g.addVertex(T.id, "modern_5", T.label, "software"
+                , ElasticHelper.createdTag, "2019-09-22 22:22:22"
+                , "name", "ripple", "lang", "java");
+        final Vertex peter = g.addVertex(T.id, "modern_6", T.label, "person"
+                , ElasticHelper.createdTag, "2019-11-22 22:22:22"
+                , "name", "peter", "age", 35, "country", "USA");
+        marko.addEdge("knows", vadas, T.id, "modern_7"
+                , "weight", 0.5d, ElasticHelper.createdTag, "2019-02-22 22:22:22");
+        marko.addEdge("knows", josh, T.id, "modern_8"
+                , "weight", 1.0d, ElasticHelper.createdTag, "2019-04-22 22:22:22");
+        marko.addEdge("created", lop, T.id, "modern_9"
+                , "weight", 0.4d, ElasticHelper.createdTag, "2019-06-22 22:22:22");
+        josh.addEdge("created", ripple, T.id, "modern_10"
+                , "weight", 1.0d, ElasticHelper.createdTag, "2019-08-22 22:22:22");
+        josh.addEdge("created", lop, T.id, "modern_11"
+                , "weight", 0.4d, ElasticHelper.createdTag, "2019-10-22 22:22:22");
+        peter.addEdge("created", lop, T.id, "modern_12"
+                , "weight", 0.2d, ElasticHelper.createdTag, "2019-12-22 22:22:22");
+        // without created value
+        marko.addEdge("supports", ripple, T.id, "modern_13"
+                , "weight", 0.4d);
+        peter.addEdge("supports", ripple, T.id, "modern_14"
+                , "weight", 0.2d);
+
     }
 
     public static void traversalTestModern(final AgensGraph g){
