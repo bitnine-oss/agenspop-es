@@ -1,6 +1,7 @@
 package net.bitnine.agenspop.elasticgraph.util;
 
 import net.bitnine.agenspop.basegraph.model.BaseEdge;
+import net.bitnine.agenspop.basegraph.model.BaseElement;
 import net.bitnine.agenspop.basegraph.model.BaseProperty;
 import net.bitnine.agenspop.elasticgraph.model.ElasticElement;
 import net.bitnine.agenspop.elasticgraph.model.ElasticProperty;
@@ -8,9 +9,13 @@ import net.bitnine.agenspop.elasticgraph.repository.ElasticVertexService;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.joda.time.format.DateTimeFormat;
 
+import javax.swing.text.DateFormatter;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,28 +26,53 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 
 public final class ElasticHelper {
 
-    public static final String createdTag = "_$$created";
-    public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    // **NOTE: move to BaseElement(interface)
+//    public static final String createdTag = "_$$created";   // "@timestamp" 는 Java에서 변수명이 못됨;
+//    public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//    public static final DateTimeFormatter[] validFormatters = {
+//            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+//            DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
+//    };
+
+    private static final LocalDateTime convertByFormatters(String value){
+        // ** 꼼수: 뒤에 시간절이 없거나, .zzZ 같은 ms 단위가 있을 시 변경
+        if( value.length() <= 10 ) value += BaseElement.dummyTime;
+        else if( value.indexOf('.') >= 14 ) value = value.substring(0, value.indexOf('.'));
+
+        LocalDateTime converted = null;
+        for( DateTimeFormatter formatter: BaseElement.validFormatters){
+            try{
+                converted = LocalDateTime.parse(value, formatter);
+                break;
+            }catch (DateTimeParseException e){
+                // ignore exception
+            }
+        }
+        return converted;
+    }
+
+    public static final LocalDateTime str2date(String value){
+        if( value == null || value.isEmpty() ) return null;
+        return convertByFormatters(value.trim());
+    }
 
     public static final String date2str(LocalDateTime value){
         if( value == null ) return null;
-        return value.format(createdFormatter);
+        return value.format(BaseElement.createdFormatter);
     }
 
     public static final boolean checkDateformat(String value){
-        if( value == null ) return false;
-        final DateTimeFormatter dtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        try {
-            LocalDateTime date = LocalDateTime.parse(value, dtformatter);
-            return date != null ? true : false;
-        }catch (DateTimeParseException e){
-            return false;
-        }
+        return str2date(value) != null ? true : false;
+//        try {
+//            LocalDateTime date = LocalDateTime.parse(value, validFormatter);    //createdFormatter);
+//        }catch (DateTimeParseException e){
+//            return false;
+//        }
     }
 
     public static String getCreatedDate(final List<ElasticProperty> properties) {
         for(BaseProperty property : properties) {
-            if( property.key().equals(createdTag) && checkDateformat(property.valueOf()) ){
+            if( property.key().equals(BaseElement.createdTag) && checkDateformat(property.valueOf()) ){
                 return property.valueOf();
             }
         }
@@ -52,10 +82,8 @@ public final class ElasticHelper {
     public static void setCreatedDate(ElasticElement element){
         if( element.getCreated() != null ) return;
         String created = getCreatedDate(element.getProperties());
-        if( created == null ){  // if not exists, set NOW() to created
-            element.setCreated( date2str(LocalDateTime.now()) );    // set to field
-            element.setProperty( element.getCreatedProperty() );    // add as property
-        }
+        if( created == null ) created = date2str(LocalDateTime.now()); // if not exists, set NOW() to created
+        element.setCreated( created );
     }
 
     // **NOTE: stream 은 재사용이 안됨!! 특히나 무한 리스트인 경우

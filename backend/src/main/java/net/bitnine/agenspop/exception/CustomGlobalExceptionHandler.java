@@ -80,14 +80,16 @@ public class CustomGlobalExceptionHandler /* extends ResponseEntityExceptionHand
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomErrorResponse> handleDefaultException(
             Exception ex, WebRequest request) {
-        System.out.println("CustomGlobalExceptionHandler ==> "+ex);
+        System.out.print("CustomGlobalExceptionHandler ==> "+ex.toString());
+        // ex.printStackTrace();
 
         CustomErrorResponse errors = new CustomErrorResponse();
         errors.setStatus(HttpStatus.BAD_REQUEST.value());
         errors.setTimestamp(LocalDateTime.now());
         errors.setType("OtherException");
-        errors.setError(ex.getMessage());
+        errors.setError(ex.toString());
         if( ex.getCause() != null ) errors.setCause(ex.getCause().getMessage());
+        else errors.setCause("RuntimeException(*)");
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }

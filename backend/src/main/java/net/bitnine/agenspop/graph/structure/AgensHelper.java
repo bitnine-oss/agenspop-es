@@ -1,5 +1,6 @@
 package net.bitnine.agenspop.graph.structure;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -10,6 +11,7 @@ import net.bitnine.agenspop.basegraph.model.BaseEdge;
 import net.bitnine.agenspop.basegraph.model.BaseElement;
 import net.bitnine.agenspop.basegraph.model.BaseProperty;
 import net.bitnine.agenspop.basegraph.model.BaseVertex;
+import net.bitnine.agenspop.elasticgraph.util.ElasticHelper;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -19,6 +21,21 @@ public final class AgensHelper {
     private static final String NOT_FOUND_EXCEPTION = "NotFoundException";
 
     private AgensHelper() { }
+
+    // Function to filter Stream by from and to as datetime range
+    public static <T> Stream<T> filterStreamByDateRange(Stream<T> stream, LocalDateTime from, LocalDateTime to) {
+        return stream.filter(e->{
+            return e instanceof AgensVertex || e instanceof AgensEdge;
+        }).filter(e->{
+            BaseElement element = ((AgensElement)e).getBaseElement();
+            if( element.keys().contains(BaseElement.createdTag) ){
+                LocalDateTime created = ElasticHelper.str2date(element.getProperty(BaseElement.createdTag).valueOf());
+                if( created.isAfter(from) && created.isBefore(to) )
+                    return true;
+            }
+            return false;
+        });
+    }
 
     // Function to get the Stream
     public static <T> Stream<T> getStreamFromIterator(Iterator<T> iterator) {

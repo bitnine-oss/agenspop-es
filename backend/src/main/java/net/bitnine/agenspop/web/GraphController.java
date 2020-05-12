@@ -3,8 +3,10 @@ package net.bitnine.agenspop.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.bitnine.agenspop.config.properties.ProductProperties;
+import net.bitnine.agenspop.elasticgraph.util.ElasticHelper;
 import net.bitnine.agenspop.graph.structure.AgensEdge;
 // import net.bitnine.agenspop.graph.structure.AgensIoRegistryV1;
+import net.bitnine.agenspop.graph.structure.AgensHelper;
 import net.bitnine.agenspop.graph.structure.AgensVertex;
 import net.bitnine.agenspop.service.AgensGremlinService;
 import net.bitnine.agenspop.dto.DetachedGraph;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -81,6 +84,8 @@ public class GraphController {
 
         String datasource = param.get("datasource").toString();
         String script = param.get("q").toString();
+        String strFrom = param.get("from") == null ? null : param.get("from").toString();
+        String strTo = param.get("to") == null ? null : param.get("to").toString();
         if( datasource.isEmpty() || script.isEmpty() )
             throw new IllegalArgumentException("parameter wrong value : datasource, q");
 
@@ -91,6 +96,12 @@ public class GraphController {
             CompletableFuture<?> future = gremlin.runGremlin(script);
             CompletableFuture.allOf(future).join();
             stream = (Stream<Object>) future.get();
+
+            if( ElasticHelper.checkDateformat(strFrom) ){
+                LocalDateTime from = ElasticHelper.str2date(strFrom);
+                LocalDateTime to = ElasticHelper.checkDateformat(strTo) ? ElasticHelper.str2date(strTo) : LocalDateTime.now();
+                stream = AgensHelper.filterStreamByDateRange(stream, from, to);
+            }
         }catch (Exception ex){
             System.out.println("** ERROR: runGremlin ==> " + ex.getMessage());
         }
@@ -101,7 +112,9 @@ public class GraphController {
     // http://localhost:8080/api/graph/gremlin?q=modern_g.V()
     @GetMapping(value="/gremlin", produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> runGremlin(
-            @RequestParam("q") String script
+            @RequestParam(value="q", required=true) String script,
+            @RequestParam(value="from", required=false) String strFrom,
+            @RequestParam(value="to", required=false) String strTo
     ) throws Exception {
         if( script == null || script.length() == 0 )
             throw new IllegalAccessException("script is empty");
@@ -119,6 +132,12 @@ public class GraphController {
             CompletableFuture<?> future = gremlin.runGremlin(script);
             CompletableFuture.allOf(future).join();
             stream = (Stream<Object>) future.get();
+
+            if( ElasticHelper.checkDateformat(strFrom) ){
+                LocalDateTime from = ElasticHelper.str2date(strFrom);
+                LocalDateTime to = ElasticHelper.checkDateformat(strTo) ? ElasticHelper.str2date(strTo) : LocalDateTime.now();
+                stream = AgensHelper.filterStreamByDateRange(stream, from, to);
+            }
         }catch (Exception ex){
             System.out.println("** ERROR: runGremlin ==> " + ex.getMessage());
         }

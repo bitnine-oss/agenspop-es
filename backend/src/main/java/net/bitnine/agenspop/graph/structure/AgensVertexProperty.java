@@ -19,13 +19,13 @@ public class AgensVertexProperty<V> implements VertexProperty<V>, WrappedVertexP
 
     // case1 : baseGraphAPI 로부터 생성되는 경우
     public AgensVertexProperty(final AgensVertex vertex, final BaseProperty baseProperty) {
-        Objects.requireNonNull(baseProperty, "AgensVertexProperty.value might be null");
+        Objects.requireNonNull(baseProperty, "AgensVertexProperty.value might be null .. case(1)");
         initVertexProperty(vertex, baseProperty);
     }
 
     // case2 : AgensGraph 외부인 사용자단으로부터 생성되는 경우
     public AgensVertexProperty(final AgensVertex vertex, final String key, final V value, final Object... propertyKeyValues) {
-        Objects.requireNonNull(value, "AgensVertexProperty.value might be null");
+        Objects.requireNonNull(value, "AgensVertexProperty.value might be null .. case(2)");
         BaseProperty baseProperty = ((AgensGraph)vertex.graph()).api.createProperty(key, value);
         initVertexProperty(vertex, baseProperty);
 
@@ -80,6 +80,7 @@ public class AgensVertexProperty<V> implements VertexProperty<V>, WrappedVertexP
     // **NOTE: Cardinality.single 에서는 사용하지 않는 메서드
     @Override
     public <U> Iterator<Property<U>> properties(final String... propertyKeys) {
+        System.out.println("## NotSupported: AgensVertexProperty.properties(): "+propertyKeys.toString());
         throw VertexProperty.Exceptions.metaPropertiesNotSupported();
 //        if (!isPresent()) return Collections.emptyIterator();
 //        List<Property<U>> valueList = new ArrayList<>();
@@ -89,6 +90,7 @@ public class AgensVertexProperty<V> implements VertexProperty<V>, WrappedVertexP
 
     @Override
     public <U> Property<U> property(final String key, final U value) {
+        System.out.println("## NotSupported: AgensVertexProperty.property(): "+key+", "+value.toString());
         throw VertexProperty.Exceptions.metaPropertiesNotSupported();
     }
 

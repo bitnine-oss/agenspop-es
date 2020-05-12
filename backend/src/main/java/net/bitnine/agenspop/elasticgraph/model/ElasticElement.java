@@ -61,6 +61,7 @@ public class ElasticElement implements BaseElement {
         if( this.removed ) return Collections.EMPTY_LIST;
 
         List<String> keys = new ArrayList<>();
+        keys.add(BaseElement.createdTag);
         for(ElasticProperty p : properties ){
             if( p.canRead() ) keys.add(p.getKey());   // pre-check exception
         }
@@ -72,6 +73,7 @@ public class ElasticElement implements BaseElement {
         if( this.removed ) return Collections.EMPTY_LIST;
 
         List<Object> values = new ArrayList<>();
+        values.add(this.created);
         for(ElasticProperty p : properties ){
             if( p.canRead() ) values.add(p.value());  // pre-check exception
         }
@@ -82,17 +84,14 @@ public class ElasticElement implements BaseElement {
     public Collection<BaseProperty> properties(){
         if( this.removed ) return Collections.EMPTY_SET;
 
-        // if not exists, add created property
-        String created = ElasticHelper.getCreatedDate(properties);
-        if( created == null ){
-            properties.add(getCreatedProperty());
-        }
-        return new HashSet<>(properties);
+        Set<BaseProperty> propertySet = new HashSet<>(properties);
+        propertySet.add(getCreatedProperty());
+        return propertySet;
     }
 
     @JsonIgnore
-    public ElasticProperty getCreatedProperty(){
-        return new ElasticProperty(ElasticHelper.createdTag, this.created);
+    private ElasticProperty getCreatedProperty(){
+        return new ElasticProperty(BaseElement.createdTag, this.created);
     }
 
     @Override
@@ -102,14 +101,14 @@ public class ElasticElement implements BaseElement {
         this.properties = properties.stream().map(r->(ElasticProperty)r).collect(Collectors.toList());
         // if exists, set created from property
         String created = ElasticHelper.getCreatedDate((List<ElasticProperty>)properties);
-        if( created != null ) this.created = created;
-        else this.created = ElasticHelper.date2str(LocalDateTime.now());
+        if( created != null ) this.created = ElasticHelper.date2str(ElasticHelper.str2date(created));
+        // else this.created = ElasticHelper.date2str(LocalDateTime.now());     // Do it at save()
     }
 
     @Override
     public boolean hasProperty(String key){
         if( this.removed ) return false;
-        return keys().contains(key) || key.equals(ElasticHelper.createdTag);
+        return keys().contains(key) || key.equals(BaseElement.createdTag);
     }
 
     @Override
@@ -120,6 +119,7 @@ public class ElasticElement implements BaseElement {
             if( property.getKey().equals(key) ) return property;
         }
         // **NOTE : created property 는 properties() 호출시 생성
+        if( key.equals(BaseElement.createdTag) ) return getCreatedProperty();
         return null;
     }
 
@@ -138,14 +138,13 @@ public class ElasticElement implements BaseElement {
         if( hasProperty(property.key()) ) removeProperty(property.key());
         properties.add((ElasticProperty) property);
         // **NOTE : update created field
-        if( property.key().equals(ElasticHelper.createdTag) && ElasticHelper.checkDateformat(property.valueOf()) )
-            this.created = property.valueOf();
+        if( property.key().equals(BaseElement.createdTag) && ElasticHelper.checkDateformat(property.valueOf()) )
+            this.created = ElasticHelper.date2str(ElasticHelper.str2date(property.valueOf()));
     }
 
     @Override
     public BaseProperty removeProperty(String key){
         if( this.removed ) return null;
-        if( key.equals(ElasticHelper.createdTag) ) return null;
 
         Iterator<ElasticProperty> iter = properties.iterator();
         while(iter.hasNext()){

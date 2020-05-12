@@ -10,6 +10,8 @@ import net.bitnine.agenspop.basegraph.model.BaseEdge;
 import net.bitnine.agenspop.basegraph.model.BaseElement;
 import net.bitnine.agenspop.basegraph.model.BaseProperty;
 import net.bitnine.agenspop.basegraph.model.BaseVertex;
+import net.bitnine.agenspop.elasticgraph.model.ElasticElement;
+import net.bitnine.agenspop.elasticgraph.util.ElasticHelper;
 import net.bitnine.agenspop.graph.structure.AgensEdge;
 import net.bitnine.agenspop.graph.structure.AgensProperty;
 import net.bitnine.agenspop.graph.structure.AgensVertex;
@@ -76,6 +78,7 @@ public final class AgensJacksonModule extends SimpleModule {
             , final SerializerProvider serializerProvider, final List<String> keys
     ) throws IOException {
         jsonGenerator.writeObjectFieldStart("scratch");
+        // writeWithType(BaseElement.createdTag, ((ElasticElement)element).getCreated(), jsonGenerator, serializerProvider);
         for (String key : keys) {
             final BaseProperty property = element.getProperty(key);
             if( property != null && property.canRead() ) {

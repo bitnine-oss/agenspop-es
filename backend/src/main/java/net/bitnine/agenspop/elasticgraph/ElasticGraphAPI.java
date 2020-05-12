@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.bitnine.agenspop.basegraph.BaseGraphAPI;
 import net.bitnine.agenspop.basegraph.BaseTx;
 import net.bitnine.agenspop.basegraph.model.BaseEdge;
+import net.bitnine.agenspop.basegraph.model.BaseElement;
 import net.bitnine.agenspop.basegraph.model.BaseProperty;
 import net.bitnine.agenspop.basegraph.model.BaseVertex;
 import net.bitnine.agenspop.config.properties.ElasticProperties;
@@ -286,7 +287,7 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     }
     @Override
     public BaseProperty createProperty(String key, Object value){
-        if( key.equals(ElasticHelper.createdTag)){
+        if( key.equals(BaseElement.createdTag)){
             if( !ElasticHelper.checkDateformat(value.toString()) )
                 throw new IllegalArgumentException("Wrong date format: 'yyyy-MM-dd HH:mm:ss'");
         }
@@ -297,6 +298,8 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     @Override
     public boolean saveVertex(BaseVertex vertex){
         ElasticHelper.setCreatedDate((ElasticElement)vertex);
+        vertex.removeProperty(BaseElement.createdTag);    // not need to save as property
+        System.out.println("saveVertex) "+vertex.getId()+" = "+vertex.keys());
         try{
             if( existsVertex(vertex.getId()) )
                 return vertices.updateDocument((ElasticVertex) vertex).equals("UPDATED") ? true : false;
@@ -308,6 +311,8 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     @Override
     public boolean saveEdge(BaseEdge edge){
         ElasticHelper.setCreatedDate((ElasticElement)edge);
+        edge.removeProperty(BaseElement.createdTag);      // not need to save as property
+        System.out.println("saveEdge) "+edge.getId()+" = "+edge.keys());
         try{
             if( existsEdge(edge.getId()) )
                 return edges.updateDocument((ElasticEdge) edge).equals("UPDATED") ? true : false;
