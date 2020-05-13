@@ -138,7 +138,7 @@ public final class AgensHelper {
         while( iter.hasNext() ){
             HasContainer c = iter.next();
             // for DEBUG
-            System.out.println(String.format("**optimizeHasContainers: %s.%s=%s (%s)", c.getKey(), c.getBiPredicate(), c.getValue(), c.getValue().getClass().getSimpleName()));
+            // System.out.println(String.format("**optimizeHasContainers: %s.%s=%s (%s)", c.getKey(), c.getBiPredicate(), c.getValue(), c.getValue().getClass().getSimpleName()));
 
             // hasId(id...)
             if( c.getKey().equals("~id") ){
@@ -218,9 +218,9 @@ public final class AgensHelper {
         }
 
         // for DEBUG
-        System.out.println("  ==> "+optimizedParams.keySet().stream()
-                .map(key -> key + "=" + optimizedParams.get(key))
-                .collect(Collectors.joining(", ", "{", "}")) );
+        // System.out.println("  ==> "+optimizedParams.keySet().stream()
+        //         .map(key -> key + "=" + optimizedParams.get(key))
+        //         .collect(Collectors.joining(", ", "{", "}")) );
         return optimizedParams;
     }
 

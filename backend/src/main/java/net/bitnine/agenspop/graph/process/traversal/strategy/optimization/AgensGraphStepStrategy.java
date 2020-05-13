@@ -43,7 +43,7 @@ public final class AgensGraphStepStrategy
         applyAgensGraphStepStrategy(traversal);
 
         // for DEBUG
-        System.out.println("AgensGraphStepStrategy = "+traversal.toString());
+        // System.out.println("AgensGraphStepStrategy = "+traversal.toString());
     }
 
     public static AgensGraphStepStrategy instance() {
