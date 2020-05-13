@@ -127,6 +127,19 @@ curl -X GET "localhost:8080/api/search/modern/v/neighbors?q=modern_1"
                 , AgensUtilHelper.productHeaders(productProperties), HttpStatus.OK);
     }
 
+    @PostMapping(value="/{datasource}/v/neighbors"
+            , consumes="application/json; charset=UTF-8"
+            , produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findV_Neighbors(
+            @PathVariable String datasource,
+            @RequestBody Map<String,List<String>> param
+    ) throws Exception {
+        String[] array = new String[param.get("q").size()];
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , param.get("q").size() == 0 ? Stream.empty() :
+                        base.findNeighborsOfVertices(datasource, param.get("q").toArray(array)) );
+    }
+
 /*
 curl -X GET "localhost:8080/api/search/modern/e/connected?q=modern_2,modern_3,modern_4"
  */

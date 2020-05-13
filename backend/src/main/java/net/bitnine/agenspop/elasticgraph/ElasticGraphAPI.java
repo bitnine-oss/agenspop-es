@@ -508,6 +508,27 @@ public class ElasticGraphAPI implements BaseGraphAPI {
         }
     }
 
+    public Stream<BaseVertex> findNeighborsOfVertices(String datasource, String[] vids){
+        Set<String> vidSet = new HashSet<>(Arrays.asList(vids));
+        Set<String> neighborIds = new HashSet<>();
+        try{
+            for( String vid : vids ) {
+                Stream<ElasticEdge> links = edges.streamByDatasourceAndDirection(datasource, vid, Direction.BOTH);
+                neighborIds.addAll( links.map(r -> r.getSrc().equals(vid) ? r.getDst() : r.getSrc())
+                        .collect(Collectors.toSet()) );
+            }
+            // get difference set of vids from neighbors
+            neighborIds.removeAll(vidSet);
+            // return neighbor vertices
+            String[] arrayIds = new String[neighborIds.size()];
+            return vertices.streamByIds(neighborIds.toArray(arrayIds))
+                    .map(r->(BaseVertex)r);
+        } catch(Exception e){
+            // System.out.println("  ==> ERROR : "+e.getMessage());
+            return Stream.empty();
+        }
+    }
+
     ///////////////////////////////////////////////////////////////
     //
     // find edges for baseAPI
