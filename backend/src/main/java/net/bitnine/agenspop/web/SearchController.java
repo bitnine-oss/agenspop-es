@@ -114,6 +114,78 @@ curl -X GET "localhost:8080/elastic/sample/e"
     }
 
     ///////////////////////////////////////////////////////////////
+    // APIs withDateRange
+
+    @PostMapping(value="/v/ids"
+            , consumes="application/json; charset=UTF-8"
+            , produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findV_Ids_WithDateRange(
+            @RequestBody Map<String,List<String>> param
+    ) throws Exception {
+        String[] array = new String[param.get("q").size()];
+        String fromDate = param.containsKey("from") ? param.get("from").toString() : null;
+        String toDate = param.containsKey("to") ? param.get("to").toString() : null;
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , param.get("q").size() == 0 ? Stream.empty() :
+                        base.findVerticesWithDateRange(param.get("q").toArray(array), fromDate, toDate) );
+    }
+    @PostMapping(value="/e/ids"
+            , consumes="application/json; charset=UTF-8"
+            , produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findE_Ids_WithDateRange(
+            @RequestBody Map<String,List<String>> param
+    ) throws Exception {
+        String[] array = new String[param.get("q").size()];
+        String fromDate = param.containsKey("from") ? param.get("from").toString() : null;
+        String toDate = param.containsKey("to") ? param.get("to").toString() : null;
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , param.get("q").size() == 0 ? Stream.empty() :
+                        base.findEdgesWithDateRange(param.get("q").toArray(array), fromDate, toDate) );
+    }
+
+    @GetMapping(value="/{datasource}/v/date", produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findV_All_WithDateRange(
+            @PathVariable String datasource,
+            @RequestParam(value="from", required=false) String fromDate,
+            @RequestParam(value="to", required=false) String toDate
+    ) throws Exception {
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , base.findVerticesWithDateRange(datasource, fromDate, toDate) );
+    }
+    @GetMapping(value="/{datasource}/e/date", produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findE_All_WithDateRange(
+            @PathVariable String datasource,
+            @RequestParam(value="from", required=false) String fromDate,
+            @RequestParam(value="to", required=false) String toDate
+    ) throws Exception {
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , base.findEdgesWithDateRange(datasource, fromDate, toDate) );
+    }
+
+    @GetMapping(value="/{datasource}/v/label/date", produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findV_Label(
+            @PathVariable String datasource,
+            @RequestParam(value="q", required=true) String label,
+            @RequestParam(value="from", required=false) String fromDate,
+            @RequestParam(value="to", required=false) String toDate
+    ) throws Exception {
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , label.isEmpty() ? Stream.empty() :
+                        base.findVerticesWithDateRange(datasource, label, fromDate, toDate) );
+    }
+    @GetMapping(value="/{datasource}/e/labels/date", produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> findE_Label(
+            @PathVariable String datasource,
+            @RequestParam(value="q", required=true) String label,
+            @RequestParam(value="from", required=false) String fromDate,
+            @RequestParam(value="to", required=false) String toDate
+    ) throws Exception {
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , label.isEmpty() ? Stream.empty() :
+                        base.findEdgesWithDateRange(datasource, label, fromDate, toDate) );
+    }
+
+    ///////////////////////////////////////////////////////////////
 
     /*
 curl -X GET "localhost:8080/api/search/modern/v/neighbors?q=modern_1"

@@ -2,6 +2,7 @@ package net.bitnine.agenspop.elasticgraph.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.bitnine.agenspop.basegraph.model.BaseElement;
 import net.bitnine.agenspop.elasticgraph.model.ElasticEdge;
 import net.bitnine.agenspop.elasticgraph.util.ElasticScrollIterator;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 
 @Slf4j
 public final class ElasticEdgeService extends ElasticElementService {
@@ -157,6 +159,19 @@ public final class ElasticEdgeService extends ElasticElementService {
         }
         // search
         return doSearch(INDEX, size, queryBuilder, client, mapper, ElasticEdge.class);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // APIs : withDateRange
+
+    public Stream<ElasticEdge> streamByIdsWithDateRange(String[] ids, String fromDate, String toDate) throws Exception {
+        return super.streamByIdsWithDateRange(INDEX, ElasticEdge.class, ids, fromDate, toDate);
+    }
+    public Stream<ElasticEdge> streamByDatasourceWithDateRange(String datasource, String fromDate, String toDate) throws Exception {
+        return super.streamByDatasourceWithDateRange(INDEX, ElasticEdge.class, datasource, fromDate, toDate);
+    }
+    public Stream<ElasticEdge> streamByDatasourceAndLabelWithDateRange(String datasource, String label, String fromDate, String toDate) throws Exception {
+        return super.streamByDatasourceAndLabelWithDateRange(INDEX, ElasticEdge.class, datasource, label, fromDate, toDate);
     }
 
     ///////////////////////////////////////////////////////////////

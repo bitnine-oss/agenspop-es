@@ -1,6 +1,7 @@
 package net.bitnine.agenspop.elasticgraph.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.bitnine.agenspop.basegraph.model.BaseElement;
 import net.bitnine.agenspop.elasticgraph.model.ElasticElement;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
@@ -11,6 +12,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -28,6 +31,7 @@ public class ElasticScrollIterator<T extends ElasticElement> implements Iterator
 
     private final long SCROLL_LIMIT;    // if -1, then unlimit scroll
     private long current_size = 0L;
+    private SortOrder sortOrder = null;
 
     public static int SCROLL_SIZE = 2500;      // MAX=10000
     public static Scroll SCROLL_TIME = new Scroll(TimeValue.timeValueMinutes(1L));
@@ -42,13 +46,18 @@ public class ElasticScrollIterator<T extends ElasticElement> implements Iterator
     private SearchHit[] searchHits;
 
     public ElasticScrollIterator(String index, long limit, QueryBuilder queryBuilder
-                , RestHighLevelClient client, ObjectMapper mapper, Class<T> tClass) {
+            , RestHighLevelClient client, ObjectMapper mapper, Class<T> tClass) {
         this.client = client;
         this.SCROLL_LIMIT = limit;
         this.index = index;
         this.tClass = tClass;
         this.mapper = mapper;
         startScroll(queryBuilder, true);
+    }
+    public ElasticScrollIterator(String index, long limit, SortOrder sortOrder, QueryBuilder queryBuilder
+            , RestHighLevelClient client, ObjectMapper mapper, Class<T> tClass) {
+        this(index, limit, queryBuilder, client, mapper, tClass);
+        this.sortOrder = sortOrder;
     }
 
     public ElasticScrollIterator(String index, long limit, String datasource
@@ -110,6 +119,12 @@ public class ElasticScrollIterator<T extends ElasticElement> implements Iterator
             searchSourceBuilder.query(queryBuilder);        // All
             searchSourceBuilder.size(SCROLL_SIZE);          // 1-page size
             searchSourceBuilder.fetchSource(withSource);    // fetch source
+
+            // **BUG: date sorting not working. why? (But, sort by _id is working)
+            if( this.sortOrder != null ) searchSourceBuilder.sort(
+                    new FieldSortBuilder("id").order(this.sortOrder) );
+                    // new FieldSortBuilder(BaseElement.timestampField).order(this.sortOrder) );
+
             searchRequest.source(searchSourceBuilder);
             searchRequest.scroll(SCROLL_TIME);
 

@@ -28,8 +28,8 @@ public final class AgensHelper {
             return e instanceof AgensVertex || e instanceof AgensEdge;
         }).filter(e->{
             BaseElement element = ((AgensElement)e).getBaseElement();
-            if( element.keys().contains(BaseElement.createdTag) ){
-                LocalDateTime created = ElasticHelper.str2date(element.getProperty(BaseElement.createdTag).valueOf());
+            if( element.keys().contains(BaseElement.timestampTag) ){
+                LocalDateTime created = ElasticHelper.str2date(element.getProperty(BaseElement.timestampTag).valueOf());
                 if( created.isAfter(from) && created.isBefore(to) )
                     return true;
             }

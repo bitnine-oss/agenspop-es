@@ -2,10 +2,7 @@ package net.bitnine.agenspop.elasticgraph.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.bitnine.agenspop.basegraph.model.BaseElement;
-import net.bitnine.agenspop.basegraph.model.BaseVertex;
 import net.bitnine.agenspop.elasticgraph.model.ElasticElement;
-import net.bitnine.agenspop.elasticgraph.model.ElasticProperty;
-import net.bitnine.agenspop.elasticgraph.model.ElasticVertex;
 import net.bitnine.agenspop.elasticgraph.util.ElasticHelper;
 import net.bitnine.agenspop.elasticgraph.util.ElasticScrollIterator;
 import org.apache.lucene.search.join.ScoreMode;
@@ -22,23 +19,19 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
-import scala.Tuple2;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.elasticsearch.index.query.QueryBuilders.termQuery;
-import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 public class ElasticElementService {
 
@@ -166,7 +159,7 @@ public class ElasticElementService {
     protected <T> List<T> findByIds(String index, Class<T> tClass
             , String[] ids
     ) throws Exception {
-        // match to datasource
+        // match to id array
         IdsQueryBuilder queryBuilder = QueryBuilders.idsQuery().addIds(ids);
         // search
         return doSearch(index, ids.length, queryBuilder, client, mapper, tClass);
@@ -437,6 +430,65 @@ public class ElasticElementService {
         return getSearchResult(response, mapper, tClass);
     }
 
+
+    ///////////////////////////////////////////////////////////////
+    // APIs : withDateRange
+
+    private RangeQueryBuilder dateRangeBuilder(String fromDate, String toDate) {
+        if( fromDate != null && toDate == null )
+            return rangeQuery(BaseElement.timestampField).gte(fromDate);
+        else if( fromDate == null && toDate != null )
+            return rangeQuery(BaseElement.timestampField).lt(toDate);
+        else if( fromDate != null && toDate != null )
+            return rangeQuery(BaseElement.timestampField).gte(fromDate).lt(toDate);
+        else
+            return rangeQuery(BaseElement.timestampField).gte("now-10m").lt("now");   // 최근 10분
+//            return rangeQuery(BaseElement.createdField).gte("now-1d/d").lt("now/d");  // 어제
+    }
+
+    // DS.hadId(id..)
+    protected <T extends ElasticElement> Stream<T> streamByIdsWithDateRange(
+            String index, Class<T> tClass, String[] ids, String fromDate, String toDate
+    ) throws Exception {
+        // match to id array and range
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .filter(idsQuery().addIds(ids))
+                .filter(dateRangeBuilder(fromDate, toDate));
+
+        ElasticScrollIterator<T> iter = new ElasticScrollIterator(index, SCROLL_LIMIT, SortOrder.ASC
+                , queryBuilder, client, mapper, tClass);
+        return ElasticScrollIterator.flatMapStream(iter);
+    }
+
+    // DS.V(), DS.E()
+    protected <T extends ElasticElement> Stream<T> streamByDatasourceWithDateRange(
+            String index, Class<T> tClass, String datasource, String fromDate, String toDate
+    ) throws Exception {
+        // match to datasource
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .filter(termQuery("datasource", datasource))
+                .filter(dateRangeBuilder(fromDate, toDate));
+        System.out.println("streamByDatasourceWithDateRange:"+dateRangeBuilder(fromDate, toDate).toString());
+
+        ElasticScrollIterator<T> iter = new ElasticScrollIterator(index, SCROLL_LIMIT, SortOrder.ASC
+                , queryBuilder, client, mapper, tClass);
+        return ElasticScrollIterator.flatMapStream(iter);
+    }
+
+    // DS.hasLabel(label..)
+    protected <T extends ElasticElement> Stream<T> streamByDatasourceAndLabelWithDateRange(
+            String index, Class<T> tClass, String datasource, String label, String fromDate, String toDate
+    ) throws Exception {
+        // match to datasource, label and range
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .filter(termQuery("datasource", datasource))
+                .filter(termQuery("label", label))
+                .filter(dateRangeBuilder(fromDate, toDate));
+
+        ElasticScrollIterator<T> iter = new ElasticScrollIterator(index, SCROLL_LIMIT, SortOrder.ASC
+                , queryBuilder, client, mapper, tClass);
+        return ElasticScrollIterator.flatMapStream(iter);
+    }
 
     ///////////////////////////////////////////////////////////////
     //

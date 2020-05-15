@@ -2,14 +2,13 @@ package net.bitnine.agenspop.elasticgraph.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.bitnine.agenspop.elasticgraph.model.ElasticEdge;
 import net.bitnine.agenspop.elasticgraph.model.ElasticVertex;
-import net.bitnine.agenspop.elasticgraph.util.ElasticScrollIterator;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -135,6 +134,19 @@ public class ElasticVertexService extends ElasticElementService {
             , final String[] values, final Map<String,String> kvPairs) throws Exception {
         return super.findByHasContainers(INDEX, ElasticVertex.class, size, datasource
                 , label, labels, key, keyNot, keys, values, kvPairs);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // APIs : withDateRange
+
+    public Stream<ElasticVertex> streamByIdsWithDateRange(String[] ids, String fromDate, String toDate) throws Exception {
+        return super.streamByIdsWithDateRange(INDEX, ElasticVertex.class, ids, fromDate, toDate);
+    }
+    public Stream<ElasticVertex> streamByDatasourceWithDateRange(String datasource, String fromDate, String toDate) throws Exception {
+        return super.streamByDatasourceWithDateRange(INDEX, ElasticVertex.class, datasource, fromDate, toDate);
+    }
+    public Stream<ElasticVertex> streamByDatasourceAndLabelWithDateRange(String datasource, String label, String fromDate, String toDate) throws Exception {
+        return super.streamByDatasourceAndLabelWithDateRange(INDEX, ElasticVertex.class, datasource, label, fromDate, toDate);
     }
 
     ///////////////////////////////////////////////////////////////

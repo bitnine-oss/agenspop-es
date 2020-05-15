@@ -9,13 +9,9 @@ import net.bitnine.agenspop.elasticgraph.repository.ElasticVertexService;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.joda.time.format.DateTimeFormat;
 
-import javax.swing.text.DateFormatter;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +68,7 @@ public final class ElasticHelper {
 
     public static String getCreatedDate(final List<ElasticProperty> properties) {
         for(BaseProperty property : properties) {
-            if( property.key().equals(BaseElement.createdTag) && checkDateformat(property.valueOf()) ){
+            if( property.key().equals(BaseElement.timestampTag) && checkDateformat(property.valueOf()) ){
                 return property.valueOf();
             }
         }
@@ -80,10 +76,10 @@ public final class ElasticHelper {
     }
 
     public static void setCreatedDate(ElasticElement element){
-        if( element.getCreated() != null ) return;
+        if( element.getTimestamp() != null ) return;
         String created = getCreatedDate(element.getProperties());
         if( created == null ) created = date2str(LocalDateTime.now()); // if not exists, set NOW() to created
-        element.setCreated( created );
+        element.setTimestamp( created );
     }
 
     // **NOTE: stream 은 재사용이 안됨!! 특히나 무한 리스트인 경우

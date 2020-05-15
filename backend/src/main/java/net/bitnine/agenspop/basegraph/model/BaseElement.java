@@ -6,7 +6,9 @@ import java.util.List;
 
 public interface BaseElement {
 
-    public static final String createdTag = "_$$created";   // "@timestamp" 는 Java에서 변수명이 못됨;
+    public static final String timestampTag = "_$$timestamp";   // "@timestamp" 는 Java에서 변수명이 못됨;
+    public static final String timestampField = "timestamp";    //  elasticsearch rangeQuery 에서 사용
+
     public static final String dummyTime = " 00:00:05";
     public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final DateTimeFormatter[] validFormatters = {
