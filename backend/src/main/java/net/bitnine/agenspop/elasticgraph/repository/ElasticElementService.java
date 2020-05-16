@@ -438,9 +438,9 @@ public class ElasticElementService {
         if( fromDate != null && toDate == null )
             return rangeQuery(BaseElement.timestampField).gte(fromDate);
         else if( fromDate == null && toDate != null )
-            return rangeQuery(BaseElement.timestampField).lt(toDate);
+            return rangeQuery(BaseElement.timestampField).lte(toDate);
         else if( fromDate != null && toDate != null )
-            return rangeQuery(BaseElement.timestampField).gte(fromDate).lt(toDate);
+            return rangeQuery(BaseElement.timestampField).gte(fromDate).lte(toDate);
         else
             return rangeQuery(BaseElement.timestampField).gte("now-10m").lt("now");   // 최근 10분
 //            return rangeQuery(BaseElement.createdField).gte("now-1d/d").lt("now/d");  // 어제
@@ -468,7 +468,6 @@ public class ElasticElementService {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .filter(termQuery("datasource", datasource))
                 .filter(dateRangeBuilder(fromDate, toDate));
-        System.out.println("streamByDatasourceWithDateRange:"+dateRangeBuilder(fromDate, toDate).toString());
 
         ElasticScrollIterator<T> iter = new ElasticScrollIterator(index, SCROLL_LIMIT, SortOrder.ASC
                 , queryBuilder, client, mapper, tClass);

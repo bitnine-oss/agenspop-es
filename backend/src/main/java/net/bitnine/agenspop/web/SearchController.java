@@ -116,31 +116,35 @@ curl -X GET "localhost:8080/elastic/sample/e"
     ///////////////////////////////////////////////////////////////
     // APIs withDateRange
 
-    @PostMapping(value="/v/ids"
+    @PostMapping(value="/v/ids/date"
             , consumes="application/json; charset=UTF-8"
             , produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> findV_Ids_WithDateRange(
-            @RequestBody Map<String,List<String>> param
+            @RequestBody Map<String,Object> param
     ) throws Exception {
-        String[] array = new String[param.get("q").size()];
+        List<String> ids = (List<String>) param.get("q");
+        String[] array = new String[ ids.size()];
         String fromDate = param.containsKey("from") ? param.get("from").toString() : null;
         String toDate = param.containsKey("to") ? param.get("to").toString() : null;
+        // System.out.println(String.format("/search/v/ids => %s, %s, %s", ids, fromDate, toDate));
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , param.get("q").size() == 0 ? Stream.empty() :
-                        base.findVerticesWithDateRange(param.get("q").toArray(array), fromDate, toDate) );
+                , ids.size() == 0 ? Stream.empty() :
+                        base.findVerticesWithDateRange(ids.toArray(array), fromDate, toDate) );
     }
-    @PostMapping(value="/e/ids"
+    @PostMapping(value="/e/ids/date"
             , consumes="application/json; charset=UTF-8"
             , produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> findE_Ids_WithDateRange(
-            @RequestBody Map<String,List<String>> param
+            @RequestBody Map<String,Object> param
     ) throws Exception {
-        String[] array = new String[param.get("q").size()];
+        List<String> ids = (List<String>) param.get("q");
+        String[] array = new String[ids.size()];
         String fromDate = param.containsKey("from") ? param.get("from").toString() : null;
         String toDate = param.containsKey("to") ? param.get("to").toString() : null;
+        // System.out.println(String.format("/search/e/ids => %s, %s, %s", ids, fromDate, toDate));
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , param.get("q").size() == 0 ? Stream.empty() :
-                        base.findEdgesWithDateRange(param.get("q").toArray(array), fromDate, toDate) );
+                , ids.size() == 0 ? Stream.empty() :
+                        base.findEdgesWithDateRange(ids.toArray(array), fromDate, toDate) );
     }
 
     @GetMapping(value="/{datasource}/v/date", produces="application/stream+json; charset=UTF-8")
