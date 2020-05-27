@@ -20,9 +20,9 @@ public class AgensAsyncExecutor extends AsyncConfigurerSupport {
     @Qualifier(value = "agensExecutor")
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(11);        // 7
-        executor.setMaxPoolSize(73);         // 42
-        executor.setQueueCapacity(23);       // 11
+        executor.setCorePoolSize(7);        // 7
+        executor.setMaxPoolSize(705);         // 42
+        executor.setQueueCapacity(3000);        // 11
         executor.setThreadNamePrefix("Agens-async-");
         executor.initialize();
         return executor;

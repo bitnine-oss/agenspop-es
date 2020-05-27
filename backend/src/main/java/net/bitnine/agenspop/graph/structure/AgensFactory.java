@@ -116,6 +116,12 @@ e6 = v6.addEdge("created", v3, T.id, 12, "weight", 0.2f);
         peter.addEdge("supports", ripple, T.id, "modern_14"
                 , "weight", 0.2d);
 
+        // addEdge Step
+        // https://tinkerpop.apache.org/docs/current/reference/#addedge-step
+        GraphTraversalSource t = g.traversal();
+        Edge newEdge = t.V("modern_1").as("src").V("modern_2").as("dst")
+                .addE("like").from("src").to("dst").property(T.id,"modern_15")
+                .property("since",2017).next();
     }
 
     public static void traversalTestModern(final AgensGraph g){

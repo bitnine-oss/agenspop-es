@@ -53,7 +53,8 @@ public class AgensGremlinService {
 
     private String concatDsAndScript(String datasource, String script){
         // remove tailling spaces
-        script = script.replaceAll("\\s+","");
+        // script = script.replaceAll("\\s+"," ");      // remove because performance problem
+
         if( script.length() <= 2 || !script.startsWith("g.") ) return null;
         // replace to graph traversal of datasource
         return AgensGraphManager.GRAPH_TRAVERSAL_NAME.apply(datasource)
