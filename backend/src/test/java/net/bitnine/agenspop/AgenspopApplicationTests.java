@@ -206,10 +206,10 @@ public class AgenspopApplicationTests {
 		assertEquals( "keys of '"+label+"' = "+results.size(), 3, results.size());
 	}
 
-	private Stream<Object> runGremlin(String script){
+	private Stream<Object> runGremlin(String datasource, String script){
 		Stream<Object> stream = Stream.empty();
 		try {
-			CompletableFuture<?> future = gremlin.runGremlin(script);
+			CompletableFuture<?> future = gremlin.runGremlin(datasource, script);
 			CompletableFuture.allOf(future).join();
 			stream = (Stream<Object>) future.get();
 		}catch (Exception ex){
@@ -223,12 +223,12 @@ public class AgenspopApplicationTests {
 		String script;
 		long result;
 
-		script = "modern_g.V()";
-		result = runGremlin(script).count();
+		script = "g.V()";
+		result = runGremlin("modern", script).count();
 		assertEquals( script+" => "+result, 6, result);
 
-		script = "modern_g.E()";
-		result = runGremlin(script).count();
+		script = "g.E()";
+		result = runGremlin("modern", script).count();
 		assertEquals( script+" => "+result, 6, result);
 	}
 
@@ -237,26 +237,26 @@ public class AgenspopApplicationTests {
 		String script;
 		long result;
 
-		script = "modern_g.V().has(\"age\",gt(30))";
-		result = runGremlin(script).count();
+		script = "g.V().has(\"age\",gt(30))";
+		result = runGremlin("modern", script).count();
 		assertEquals( script+" => "+result, 2, result);
 
-		script = "modern_g.V().has(\"name\",\"marko\").out().out()";
-		result = runGremlin(script).count();
+		script = "g.V().has(\"name\",\"marko\").out().out()";
+		result = runGremlin("modern", script).count();
 		assertEquals( script+" => "+result, 2, result);
 
 		List<Object> list;
 
 		// 2 = modern_g.V().groupCount().by(T.label)
-		script = "modern_g.V().groupCount().by(T.label)";
-		list = runGremlin(script).collect(Collectors.toList());
+		script = "g.V().groupCount().by(T.label)";
+		list = runGremlin("modern", script).collect(Collectors.toList());
 		assertTrue(list.size() > 0);
 		Map<String,Long> grp1 = (Map<String,Long>)list.get(0);
 		assertEquals( script+" => "+grp1.size(), 2, grp1.size());
 
 		// 3 = modern_g.V().hasLabel("person").properties().key().groupCount()
-		script = "modern_g.V().hasLabel(\"person\").properties().key().groupCount()";
-		list = runGremlin(script).collect(Collectors.toList());
+		script = "g.V().hasLabel(\"person\").properties().key().groupCount()";
+		list = runGremlin("modern", script).collect(Collectors.toList());
 		assertTrue(list.size() > 0);
 		Map<String,Long> grp2 = (Map<String,Long>)list.get(0);
 		// exclude graph features like started with '_$$'
@@ -264,8 +264,8 @@ public class AgenspopApplicationTests {
 		assertEquals( script+" => "+results.size(), 3, results.size());
 
 		// 2 = modern_g.E().project("self","inL","outL").by(__.label()).by(__.inV().label()).by(__.outV().label()).groupCount()
-		script = "modern_g.E().project(\"self\",\"inL\",\"outL\").by(__.label()).by(__.inV().label()).by(__.outV().label()).groupCount()";
-		list = runGremlin(script).collect(Collectors.toList());
+		script = "g.E().project(\"self\",\"inL\",\"outL\").by(__.label()).by(__.inV().label()).by(__.outV().label()).groupCount()";
+		list = runGremlin("modern", script).collect(Collectors.toList());
 		assertTrue(list.size() > 0);
 		Map<String,Long> grp3 = (Map<String,Long>)list.get(0);
 		assertEquals( script+" => "+grp3.size(), 2, grp3.size());

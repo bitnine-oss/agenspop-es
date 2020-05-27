@@ -12,6 +12,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTrav
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.opencypher.gremlin.translation.TranslationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,22 +51,51 @@ public class AgensGremlinService {
         this.cfog = new TranslationFacade();
     }
 
+    private String concatDsAndScript(String datasource, String script){
+        // remove tailling spaces
+        script = script.replaceAll("\\s+","");
+        if( script.length() <= 2 || !script.startsWith("g.") ) return null;
+        // replace to graph traversal of datasource
+        return AgensGraphManager.GRAPH_TRAVERSAL_NAME.apply(datasource)
+                + "." + script.substring(2);
+    }
+
+    // **NOTE: 파라미터에 datasource 추가 (2020-05-27)
+    //      - 새로운 datasource 에 대한 addV, addE 등이 들어올 때 datasource가 GremlinExecutor에 등록되어 있어야 함
+    //      - datasource 로부터 graphManager.openGraph 를 먼저 수행해 null 체크 -> 이상 없으면 진행
+    //      - 어차피 저장된 데이터가 없으면 다음 기동때 사라짐
+
     @Async("agensExecutor")
-    public CompletableFuture<?> runGremlin(String script){
+    public CompletableFuture<?> runGremlin(String datasource, String script){
         try{
             // use no timeout on the engine initialization - perhaps this can be a configuration later
             final GremlinExecutor.LifeCycle lifeCycle = GremlinExecutor.LifeCycle.build().
                     scriptEvaluationTimeoutOverride(0L).create();
             final Bindings bindings = new SimpleBindings(Collections.emptyMap());
 
-            final CompletableFuture<Object> evalFuture = gremlinExecutor.eval(script, GREMLIN_GROOVY, bindings, lifeCycle);
+            // 1) check graphName by datasource
+            Graph graph = this.graphManager.openGraph(datasource);
+            if( graph == null ){
+                System.out.println("[gremlin] InvalidArguments: datasource="+datasource);
+                return CompletableFuture.completedFuture(Stream.empty());
+            }
+
+            // 2) concat datasource and gremlin script
+            String scriptWithDs = this.concatDsAndScript(datasource, script);
+            if( scriptWithDs == null ){
+                System.out.println("[gremlin] InvalidArguments: script="+script);
+                return CompletableFuture.completedFuture(Stream.empty());
+            }
+
+            // 3) run script by GremlinExecutor
+            final CompletableFuture<Object> evalFuture = gremlinExecutor.eval(scriptWithDs, GREMLIN_GROOVY, bindings, lifeCycle);
             CompletableFuture.allOf(evalFuture).join();
 
             Object result = evalFuture.get();
             if( result != null && result instanceof GraphTraversal ){
                 GraphTraversal t = (GraphTraversal) evalFuture.get();
                 // for DEBUG
-                System.out.println("\ngremlin"+(t.hasNext() ? "*" : "")+"> "+script+"\n  ==> "+t.toString());
+                System.out.println("\ngremlin"+(t.hasNext() ? "*" : "")+"> "+scriptWithDs+"\n  ==> "+t.toString());
 
                 return CompletableFuture.completedFuture(
                         AgensHelper.getStreamFromIterator((Iterator<Object>)t) );
@@ -99,14 +129,18 @@ expected> type = LinkedHashMap()
  */
 
     @Async("agensExecutor")
-    public CompletableFuture<?> runCypher(String cypher, String datasource){
+    public CompletableFuture<?> runCypher(String datasource, String cypher){
         try{
+            // use no timeout on the engine initialization - perhaps this can be a configuration later
+            final GremlinExecutor.LifeCycle lifeCycle = GremlinExecutor.LifeCycle.build().
+                    scriptEvaluationTimeoutOverride(0L).create();
+            final Bindings bindings = new SimpleBindings(Collections.emptyMap());
+
             // **참고
             // https://github.com/opencypher/cypher-for-gremlin/tree/master/translation
             //
-            // translate cypher query to gremlin
+            // 0) translate cypher query to gremlin
             String script = cfog.toGremlinGroovy(cypher);
-
 /*
             // **NOTE: 기본 translator 와 별 다를게 없다
             String cypher = "MATCH (p:Person) WHERE p.age > 25 RETURN p.name";
@@ -114,21 +148,22 @@ expected> type = LinkedHashMap()
             Translator<String, GroovyPredicate> translator = Translator.builder().gremlinGroovy().build(TranslatorFlavor.cosmosDb());
             String script = ast.buildTranslation(translator);
 */
-            // replace to graph traversal of datasource
-            if( script.length() > 2 && script.startsWith("g.") ) {
-                script = AgensGraphManager.GRAPH_TRAVERSAL_NAME.apply(datasource)
-                        + "." + script.substring(2);
-                script = script.replaceAll("\\s+","");   // remove tailling spaces
+            // 1) check graphName by datasource
+            Graph graph = this.graphManager.openGraph(datasource);
+            if( graph == null ){
+                System.out.println("[cypher] InvalidArguments: datasource="+datasource);
+                return CompletableFuture.completedFuture(Stream.empty());
             }
-            // for DEBUG
-            // System.out.println("**cypher-to-gremlin: "+cypher+"\n  ==> "+script);
 
-            // use no timeout on the engine initialization - perhaps this can be a configuration later
-            final GremlinExecutor.LifeCycle lifeCycle = GremlinExecutor.LifeCycle.build().
-                    scriptEvaluationTimeoutOverride(0L).create();
-            final Bindings bindings = new SimpleBindings(Collections.emptyMap());
+            // 2) concat datasource and gremlin script
+            String scriptWithDs = this.concatDsAndScript(datasource, script);
+            if( scriptWithDs == null ){
+                System.out.println("[cypher] InvalidArguments: script="+script);
+                return CompletableFuture.completedFuture(Stream.empty());
+            }
 
-            final CompletableFuture<Object> evalFuture = gremlinExecutor.eval(script, GREMLIN_GROOVY, bindings, lifeCycle);
+            // 3) run script by GremlinExecutor
+            final CompletableFuture<Object> evalFuture = gremlinExecutor.eval(scriptWithDs, GREMLIN_GROOVY, bindings, lifeCycle);
             CompletableFuture.allOf(evalFuture).join();
 
             Object result = evalFuture.get();
@@ -136,12 +171,14 @@ expected> type = LinkedHashMap()
                 // DefaultGraphTraversal t = (DefaultGraphTraversal) evalFuture.get();
                 DefaultGraphTraversal t = (DefaultGraphTraversal) evalFuture.get();
                 // for DEBUG
-                System.out.println("\ncypher"+(t.hasNext() ? "*" : "")+"> "+script+"\n  ==> "+t.toString());
+                System.out.println("\ncypher"+(t.hasNext() ? "*" : "")+"> "+scriptWithDs+"\n  ==> "+t.toString());
 
                 return CompletableFuture.completedFuture(
                         AgensHelper.getStreamFromIterator((Iterator<Object>)t) );
             }
-            return CompletableFuture.completedFuture(Stream.of(result));
+            // for DEBUG
+            System.out.println("  ==> "+result.toString()+"|"+result.getClass().getSimpleName()+"\n");
+            return CompletableFuture.completedFuture( Stream.of(result) );
 
         } catch (Exception ex) {
             // tossed to exceptionCaught which delegates to sendError method

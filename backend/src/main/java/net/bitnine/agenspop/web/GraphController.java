@@ -73,10 +73,10 @@ public class GraphController {
     ///////////////////////////////////////////
 
     // http://localhost:8080/api/graph/gremlin?q=modern_g.V()
-    @PostMapping(value="/gremlin"
+    @PostMapping(value="/gremlin/range"
             , consumes="application/json; charset=UTF-8"
             , produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> execGremlin(
+    public ResponseEntity<?> runGremlinWithRange(
             @RequestBody Map<String,Object> param
     ) throws Exception {
         if( !param.containsKey("datasource") || !param.containsKey("q") )
@@ -89,11 +89,46 @@ public class GraphController {
         if( datasource.isEmpty() || script.isEmpty() )
             throw new IllegalArgumentException("parameter wrong value : datasource, q");
 
-        script = datasource+"_"+script;
+        Stream<Object> stream = Stream.empty();
+        try {
+            CompletableFuture<?> future = gremlin.runGremlin(datasource, script);
+            CompletableFuture.allOf(future).join();
+            stream = (Stream<Object>) future.get();
+
+            if( ElasticHelper.checkDateformat(strFrom) ){
+                LocalDateTime from = ElasticHelper.str2date(strFrom);
+                LocalDateTime to = ElasticHelper.checkDateformat(strTo) ? ElasticHelper.str2date(strTo) : LocalDateTime.now();
+                stream = AgensHelper.filterStreamByDateRange(stream, from, to);
+            }
+        }catch (Exception ex){
+            System.out.println("** ERROR: runGremlin ==> " + ex.getMessage());
+        }
+        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
+                , stream );
+    }
+
+    // http://localhost:8080/api/graph/gremlin?q=modern_g.V()
+    @GetMapping(value="/gremlin/range", produces="application/stream+json; charset=UTF-8")
+    public ResponseEntity<?> runGremlinWithRange(
+            @RequestParam(value="datasource", required=true) String datasource,
+            @RequestParam(value="q", required=true) String script,
+            @RequestParam(value="from", required=false) String strFrom,
+            @RequestParam(value="to", required=false) String strTo
+    ) throws Exception {
+        if( script == null || script.length() == 0 )
+            throw new IllegalAccessException("script is empty");
+
+        // sql decoding : "+", "%", "&" etc..
+        try {
+            script = URLDecoder.decode(script, StandardCharsets.UTF_8.toString());
+        }catch(UnsupportedEncodingException ue){
+            System.out.println("api.query: UnsupportedEncodingException => "+script);
+            throw new IllegalArgumentException("UnsupportedEncodingException => "+ue.getCause());
+        }
 
         Stream<Object> stream = Stream.empty();
         try {
-            CompletableFuture<?> future = gremlin.runGremlin(script);
+            CompletableFuture<?> future = gremlin.runGremlin(datasource, script);
             CompletableFuture.allOf(future).join();
             stream = (Stream<Object>) future.get();
 
@@ -112,9 +147,7 @@ public class GraphController {
     // http://localhost:8080/api/graph/gremlin?q=modern_g.V()
     @GetMapping(value="/gremlin", produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> runGremlin(
-            @RequestParam(value="q", required=true) String script,
-            @RequestParam(value="from", required=false) String strFrom,
-            @RequestParam(value="to", required=false) String strTo
+            @RequestParam(value="q", required=true) String script
     ) throws Exception {
         if( script == null || script.length() == 0 )
             throw new IllegalAccessException("script is empty");
@@ -127,17 +160,19 @@ public class GraphController {
             throw new IllegalArgumentException("UnsupportedEncodingException => "+ue.getCause());
         }
 
+        // not found datasource
+        int pos = script.indexOf("_g.");
+        if( pos < 1 ){
+            throw new IllegalArgumentException("runGremlin: not found datasource concated script with char('_')");
+        }
+        String datasource = script.substring(0, pos);
+        script = script.substring(pos+1);
+
         Stream<Object> stream = Stream.empty();
         try {
-            CompletableFuture<?> future = gremlin.runGremlin(script);
+            CompletableFuture<?> future = gremlin.runGremlin(datasource, script);
             CompletableFuture.allOf(future).join();
             stream = (Stream<Object>) future.get();
-
-            if( ElasticHelper.checkDateformat(strFrom) ){
-                LocalDateTime from = ElasticHelper.str2date(strFrom);
-                LocalDateTime to = ElasticHelper.checkDateformat(strTo) ? ElasticHelper.str2date(strTo) : LocalDateTime.now();
-                stream = AgensHelper.filterStreamByDateRange(stream, from, to);
-            }
         }catch (Exception ex){
             System.out.println("** ERROR: runGremlin ==> " + ex.getMessage());
         }
