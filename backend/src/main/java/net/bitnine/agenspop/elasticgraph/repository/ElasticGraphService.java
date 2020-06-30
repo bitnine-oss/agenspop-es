@@ -19,13 +19,16 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 
@@ -41,14 +44,19 @@ public class ElasticGraphService {
     private final int numOfShards;
     private final int numOfReplicas;
 
+    private ResourceLoader resourceLoader;
+
     private RestHighLevelClient client;
     private ObjectMapper objectMapper;
 
     public ElasticGraphService(
             RestHighLevelClient client,     // elasticsearch config
             ObjectMapper objectMapper,      // spring boot web starter
-            String vertexIndex, String edgeIndex,
-            int numOfShards, int numOfReplicas
+            String vertexIndex,
+            String edgeIndex,
+            int numOfShards,
+            int numOfReplicas,
+            ResourceLoader resourceLoader   // for accessing classpath in fat jar
     ) {
         this.client = client;
         this.objectMapper = objectMapper;
@@ -56,6 +64,7 @@ public class ElasticGraphService {
         this.INDEX_EDGE = edgeIndex;
         this.numOfShards = numOfShards;
         this.numOfReplicas = numOfReplicas;
+        this.resourceLoader = resourceLoader;
     }
 
     ///////////////////////////////////////////////////////////////
@@ -68,9 +77,15 @@ public class ElasticGraphService {
 
     private String readMappings(String index) throws Exception {
         String mappings_file = index.equals(INDEX_VERTEX) ? MAPPINGS_VERTEX : MAPPINGS_EDGE;
-        File file = ResourceUtils.getFile(mappings_file);
-        if( !file.exists() ) throw new FileNotFoundException("mappings not found => "+mappings_file);
-        return new String(Files.readAllBytes(file.toPath()));
+        Resource resource = resourceLoader.getResource(mappings_file);
+        if( !resource.exists() ){
+            System.out.println("** ERROR : mapping of ["+index+"] not found ==> "+resource.getURL().toString());
+            throw new FileNotFoundException("mappings not found => "+mappings_file);
+        }
+        System.out.println("mapping of ["+index+"] ==> "+resource.getURL().toString());
+        InputStream inputStream = resourceLoader.getResource(resource.getURL().toString()).getInputStream();
+        return new BufferedReader(new InputStreamReader(inputStream))
+                .lines().collect(Collectors.joining("\n"));
     }
 
     private boolean createIndex(String index) throws Exception {
@@ -115,7 +130,7 @@ public class ElasticGraphService {
         if( !checkExistsIndex(INDEX_EDGE) ) state |= createIndex(INDEX_EDGE);
 
         if( state )
-            System.out.println("index not found : create index ["+INDEX_VERTEX+","+INDEX_EDGE+"]");
+            System.out.println("\n** Index not found : create Index ["+INDEX_VERTEX+", "+INDEX_EDGE+"]\n");
     }
 
     //////////////////////////////////////////////

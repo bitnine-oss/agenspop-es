@@ -24,6 +24,7 @@ import net.bitnine.agenspop.elasticgraph.util.ElasticSample;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -50,6 +51,7 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     @Autowired
     public ElasticGraphAPI(
             ElasticProperties elasticProperties,
+            ResourceLoader resourceLoader,  // for accessing classpath in fat jar
             RestHighLevelClient client,     // elasticsearch config
             ObjectMapper mapper             // spring boot web starter
     ) {
@@ -64,7 +66,8 @@ public class ElasticGraphAPI implements BaseGraphAPI {
                 , elasticProperties.getEdgeIndex(), SCROLL_LIMIT);
         this.graph = new ElasticGraphService(client, mapper
                 , elasticProperties.getVertexIndex(), elasticProperties.getEdgeIndex()
-                , elasticProperties.getIndexShards(), elasticProperties.getIndexReplicas());
+                , elasticProperties.getIndexShards(), elasticProperties.getIndexReplicas()
+                , resourceLoader);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class AgensGraphManager implements GraphManager {
         this.instance = this;
 
         // for DEBUG
-        System.out.println("AgensGraphManager is initializing.");
+        System.out.println("\n** AgensGraphManager is initializing.");
     }
 
     public static AgensGraphManager getInstance() {

@@ -22,12 +22,10 @@ agens:
     base-path: /api
     query-timeout: 600000       # 1000 ms = 1 sec
   elasticsearch:
-#    host: 27.117.163.21
-#    port: 15619
     host: 192.168.0.30
-    port: 9200
-    username:
-    password:
+    port: 39200
+    username: elastic
+    password: bitnine
     scroll-limit: -1            # -1(unlimit) or more than 2500
     vertex-index: agensvertex
     edge-index: agensedge
