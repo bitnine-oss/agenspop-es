@@ -10,40 +10,40 @@ This is a part of Agenspop-es and backend project.
 
 #### 전체 그래프 탐색
 
-* [<GET> ~/search/{datasource}/v](http://localhost:8080/api/search/modern/v)
-* [<GET> ~/search/{datasource}/e](http://localhost:8080/api/search/modern/e)
+* [<GET> ~/search/{datasource}/v](http://tonyne.iptime.org:8080/api/search/modern/v)
+* [<GET> ~/search/{datasource}/e](http://tonyne.iptime.org:8080/api/search/modern/e)
 
 #### vertex, edge 공통 search API
 
-* [<GET> ~/search/{datasource}/{type}/neighbors?q={vid}](http://localhost:8080/api/search/modern/v/neighbors?q=modern_4)
-* [<GET> ~/search/{datasource}/{type}/ids?q={[ids]}](http://localhost:8080/api/search/modern/v/neighbors?q=modern_4)
+* [<GET> ~/search/{datasource}/{type}/neighbors?q={vid}](http://tonyne.iptime.org:8080/api/search/modern/v/neighbors?q=modern_4)
+* [<GET> ~/search/{datasource}/{type}/ids?q={[ids]}](http://tonyne.iptime.org:8080/api/search/modern/v/neighbors?q=modern_4)
   - POST: [<POST> ~/search/{datasource}/{type}/ids](about:blank)
-* [<GET> ~/search/{datasource}/{type}/labels?q={labels}](http://localhost:8080/api/search/modern/v/labels?q=person,software)
-* [<GET> ~/search/{datasource}/{type}/keys?q={keys}](http://localhost:8080/api/search/modern/v/keys?q=country,age)
-* [<GET> ~/search/{datasource}/{type}/key?q={key}&hasNot={true/false}](http://localhost:8080/api/search/modern/v/key?q=lang&hasNot=true)
-* [<GET> ~/search/{datasource}/{type}/values?q={values}](http://localhost:8080/api/search/modern/v/values?q=USA,marko)
-* [<GET> ~/search/{datasource}/{type}/value?q={value}](http://localhost:8080/api/search/modern/v/value?q=jav)
-* [<GET> ~/search/{datasource}/{type}/keyvalue?key={key}&value={value}](http://localhost:8080/api/search/modern/v/keyvalue?key=country&value=USA)
-* [<GET> ~/search/{datasource}/{type}/labelkeyvalue?label={label}&key={key}&value={value}](http://localhost:8080/api/search/modern/v/labelkeyvalue?label=software&key=lang&value=java)
+* [<GET> ~/search/{datasource}/{type}/labels?q={labels}](http://tonyne.iptime.org:8080/api/search/modern/v/labels?q=person,software)
+* [<GET> ~/search/{datasource}/{type}/keys?q={keys}](http://tonyne.iptime.org:8080/api/search/modern/v/keys?q=country,age)
+* [<GET> ~/search/{datasource}/{type}/key?q={key}&hasNot={true/false}](http://tonyne.iptime.org:8080/api/search/modern/v/key?q=lang&hasNot=true)
+* [<GET> ~/search/{datasource}/{type}/values?q={values}](http://tonyne.iptime.org:8080/api/search/modern/v/values?q=USA,marko)
+* [<GET> ~/search/{datasource}/{type}/value?q={value}](http://tonyne.iptime.org:8080/api/search/modern/v/value?q=jav)
+* [<GET> ~/search/{datasource}/{type}/keyvalue?key={key}&value={value}](http://tonyne.iptime.org:8080/api/search/modern/v/keyvalue?key=country&value=USA)
+* [<GET> ~/search/{datasource}/{type}/labelkeyvalue?label={label}&key={key}&value={value}](http://tonyne.iptime.org:8080/api/search/modern/v/labelkeyvalue?label=software&key=lang&value=java)
 
 #### edge 전용 search API
 
-* [<GET> ~/search/{datasource}/e/connected?q={vids}](http://localhost:8080/api/search/modern/e/connected?q=modern_1,modern_3,modern_6)
+* [<GET> ~/search/{datasource}/e/connected?q={vids}](http://tonyne.iptime.org:8080/api/search/modern/e/connected?q=modern_1,modern_3,modern_6)
 
 #### Admin API
 
-* [<GET> ~/admin/config](http://localhost:8080/api/admin/config)
-* [<GET> ~/admin/graphs](http://localhost:8080/api/admin/graphs)
-* [<GET> ~/admin/update](http://localhost:8080/api/admin/update)
-* [<GET> ~/admin/remove/{datasource}](http://localhost:8080/api/admin/remove/modern)
-* [<GET> ~/admin/labels/{datasource}](http://localhost:8080/api/admin/labels/modern)
-* [<GET> ~/admin/keys/{datasource}/{label}](http://localhost:8080/api/admin/keys/modern/person)
-* [<GET> ~/admin/reset/sample](http://localhost:8080/api/admin/reset/sample)
+* [<GET> ~/admin/config](http://tonyne.iptime.org:8080/api/admin/config)
+* [<GET> ~/admin/graphs](http://tonyne.iptime.org:8080/api/admin/graphs)
+* [<GET> ~/admin/update](http://tonyne.iptime.org:8080/api/admin/update)
+* [<GET> ~/admin/remove/{datasource}](http://tonyne.iptime.org:8080/api/admin/remove/modern)
+* [<GET> ~/admin/labels/{datasource}](http://tonyne.iptime.org:8080/api/admin/labels/modern)
+* [<GET> ~/admin/keys/{datasource}/{label}](http://tonyne.iptime.org:8080/api/admin/keys/modern/person)
+* [<GET> ~/admin/reset/sample](http://tonyne.iptime.org:8080/api/admin/reset/sample)
 
 #### graph API
 
-* [<GET> ~/graph/gremlin?q={gremlin_query}](http://localhost:8080/api/graph/gremlin?q=modern_g.V().has(%27age%27,gt(30)))
-* [<GET> ~/graph/cypher?ds={datasource}&q={cypher_query}](http://localhost:8080/api/graph/cypher?ds=modern&q=match%20(a:person%20%7Bcountry:%20%27USA%27%7D)%20return%20a,%20id(a)%20limit%2010)
+* [<GET> ~/graph/gremlin?q={gremlin_query}](http://tonyne.iptime.org:8080/api/graph/gremlin?q=modern_g.V().has(%27age%27,gt(30)))
+* [<GET> ~/graph/cypher?ds={datasource}&q={cypher_query}](http://tonyne.iptime.org:8080/api/graph/cypher?ds=modern&q=match%20(a:person%20%7Bcountry:%20%27USA%27%7D)%20return%20a,%20id(a)%20limit%2010)
 
 ### Config-file 
 
@@ -93,16 +93,56 @@ agens:
     debug: false                # front 쪽의 전달할 설정내용 - debug 사용시 브라우저의 개발자모드에서 콘솔 로그 확인 가능 (시간측정 포함)
 ```
 
-### AgensGraph
+### Elasticsearch backup and restore
 
-processing transaction with traversaling vertices and edges
+```bash
+## open dev-tool of kibana
 
-### Elasticsearch indexing
+#################################
+## 백업절차 : repository 생성 후 snapshot 생성 
+##     - path.repo: ["/hdd_ext/hdd1t/backup/elasticsearch"]
 
-fulltext search about vertices, edges and properties
+## create repository for snapshot
+PUT _snapshot/demo_backup
+{
+  "type": "fs",
+  "settings": {
+    "location": "/hdd_ext/hdd1t/backup/elasticsearch"
+  }
+}
 
-simple statistics by aggregation of elasticsearch
- 
-### CytoSON Serializer, Deserializer
+## create snapshot to repository
+PUT /_snapshot/demo_backup/demo-20200701?wait_for_completion=true
+{
+  "indices": "agens*",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}
 
-convert Graph, Vertices, Edges to Objects of Cytoscape.js  
+#################################
+## snapshot, repository 관리 
+
+## delete snapshot in repository
+DELETE /_snapshot/demo_backup/demo-20200601
+
+## delete repository
+DELETE /_snapshot/test_backup
+
+#################################
+## 복구절차 : 작동중인 index를 중지하고, 복구 후 다시 시작 
+
+## 1) close indices which are opened
+POST /agens*/_close
+
+## 2) restore from snapshot
+POST /_snapshot/demo_backup/demo-20200601/_restore
+{
+  "indices": "agens*",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}
+
+## 3) re-open indices after restore
+POST /agens*/_open
+
+```
