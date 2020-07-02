@@ -184,7 +184,7 @@ public class GraphController {
     @GetMapping(value="/cypher", produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> runCypher(
             @RequestParam("q") String script
-            , @RequestParam(value="ds", required=false, defaultValue ="modern") String datasource
+            , @RequestParam(value="ds", required=true, defaultValue ="modern") String datasource
     ) throws Exception {
         if( script == null || script.length() == 0 )
             throw new IllegalAccessException("script is empty");
@@ -199,7 +199,7 @@ public class GraphController {
 
         Stream<Object> stream = Stream.empty();
         try {
-            CompletableFuture<?> future = gremlin.runCypher(script, datasource);
+            CompletableFuture<?> future = gremlin.runCypher(datasource, script);
             CompletableFuture.allOf(future).join();
             stream = (Stream<Object>)future.get();
         }catch (Exception ex){
