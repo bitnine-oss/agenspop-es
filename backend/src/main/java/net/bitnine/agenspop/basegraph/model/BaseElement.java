@@ -10,10 +10,10 @@ public interface BaseElement {
     public static final String timestampField = "timestamp";    //  elasticsearch rangeQuery 에서 사용
 
     public static final String dummyTime = " 00:00:05";
-    public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     public static final DateTimeFormatter[] validFormatters = {
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-            DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HH:mm:ss")
     };
 
     String getId();

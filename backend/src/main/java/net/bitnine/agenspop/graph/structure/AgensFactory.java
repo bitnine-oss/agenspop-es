@@ -81,35 +81,35 @@ e6 = v6.addEdge("created", v3, T.id, 12, "weight", 0.2f);
  */
     public static void generateModern(final AgensGraph g) {
         final Vertex marko = g.addVertex(T.id, "modern_1", T.label, "person"
-                , BaseElement.timestampTag, "2019-01-22 22:22:22"
+                , BaseElement.timestampTag, "2019-01-22T22:22:22"
                 , "name", "marko", "age", 29, "country", "USA");
         final Vertex vadas = g.addVertex(T.id, "modern_2", T.label, "person"
-                , BaseElement.timestampTag, "2019-03-22 22:22:22"
+                , BaseElement.timestampTag, "2019-03-22T22:22:22"
                 , "name", "vadas", "age", 27, "country", "USA");
         final Vertex lop = g.addVertex(T.id, "modern_3", T.label, "software"
-                , BaseElement.timestampTag, "2019-05-22 22:22:22"
+                , BaseElement.timestampTag, "2019-05-22T22:22:22"
                 , "name", "lop", "lang", "java");
         final Vertex josh = g.addVertex(T.id, "modern_4", T.label, "person"
-                , BaseElement.timestampTag, "2019-07-22 22:22:22"
+                , BaseElement.timestampTag, "2019-07-22T22:22:22"
                 , "name", "josh", "age", 32, "country", "USA");
         final Vertex ripple = g.addVertex(T.id, "modern_5", T.label, "software"
-                , BaseElement.timestampTag, "2019-09-22 22:22:22"
+                , BaseElement.timestampTag, "2019-09-22T22:22:22"
                 , "name", "ripple", "lang", "java");
         final Vertex peter = g.addVertex(T.id, "modern_6", T.label, "person"
-                , BaseElement.timestampTag, "2019-11-22 22:22:22"
+                , BaseElement.timestampTag, "2019-11-22T22:22:22"
                 , "name", "peter", "age", 35, "country", "USA");
         marko.addEdge("knows", vadas, T.id, "modern_7"
-                , "weight", 0.5d, BaseElement.timestampTag, "2019-02-22 22:22:22");
+                , "weight", 0.5d, BaseElement.timestampTag, "2019-02-22T22:22:22");
         marko.addEdge("knows", josh, T.id, "modern_8"
-                , "weight", 1.0d, BaseElement.timestampTag, "2019-04-22 22:22:22");
+                , "weight", 1.0d, BaseElement.timestampTag, "2019-04-22T22:22:22");
         marko.addEdge("created", lop, T.id, "modern_9"
-                , "weight", 0.4d, BaseElement.timestampTag, "2019-06-22 22:22:22");
+                , "weight", 0.4d, BaseElement.timestampTag, "2019-06-22T22:22:22");
         josh.addEdge("created", ripple, T.id, "modern_10"
-                , "weight", 1.0d, BaseElement.timestampTag, "2019-08-22 22:22:22");
+                , "weight", 1.0d, BaseElement.timestampTag, "2019-08-22T22:22:22");
         josh.addEdge("created", lop, T.id, "modern_11"
-                , "weight", 0.4d, BaseElement.timestampTag, "2019-10-22 22:22:22");
+                , "weight", 0.4d, BaseElement.timestampTag, "2019-10-22T22:22:22");
         peter.addEdge("created", lop, T.id, "modern_12"
-                , "weight", 0.2d, BaseElement.timestampTag, "2019-12-22 22:22:22");
+                , "weight", 0.2d, BaseElement.timestampTag, "2019-12-22T22:22:22");
         // without created value
         marko.addEdge("supports", ripple, T.id, "modern_13"
                 , "weight", 0.4d);

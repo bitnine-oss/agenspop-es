@@ -22,8 +22,8 @@ agens:
     base-path: /api
     query-timeout: 600000       # 1000 ms = 1 sec
   elasticsearch:
-    host: 192.168.0.30
-    port: 39200
+    host: 192.168.0.20
+    port: 29200
     username: elastic
     password: bitnine
     scroll-limit: -1            # -1(unlimit) or more than 2500
@@ -31,7 +31,7 @@ agens:
     edge-index: agensedge
     edge-validation: false      # if true, check valid edge on each request (make slow)
     index-shards: 1             # when create index, apply to setting
-    index-replicas: 0           # when create index, apply to setting
+    index-replicas: 1           # when create index, apply to setting
   product:
     name: agenspop-es
     version: 0.7.3

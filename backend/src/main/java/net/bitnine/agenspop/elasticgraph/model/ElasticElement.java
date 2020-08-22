@@ -24,11 +24,22 @@ public class ElasticElement implements BaseElement {
     // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     // protected LocalDateTime created;   // Date format: "yyyy-MM-dd HH:mm:ss"
 
+    // ISODateTime Converter
+    // http://www.java2s.com/example/java-src/pkg/com/tkmtwo/timex/convert/isodatetimeconverter-ce9a9.html
+
+    // Elasticsearch DateTime format
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html
+    // ==> basic_date_time_no_millis
+    // A basic formatter without millis, separated by a T: yyyyMMdd'T'HHmmssZ
+    // ==> Create ISO8601 joda compatible java time formatter (#38434)
+    // https://github.com/elastic/elasticsearch/commit/dfa4625de5faf3641c7e9888dd7e8b7bbcf10445
+    // server/src/test/java/org/elasticsearch/common/joda/JavaJodaTimeDuellingTests.java
+
     // **NOTE: 굳이 LocalDateTime 을 유지할 필요가 있을까? 변환하느라 약간 느려짐
     // ==> gremlin 에서 시간 쿼리를 하기 위해??
     // ==> 일단은 String 으로 처리하자! (date range 는 elasticsearch 에서 처리)
-    protected String timestamp;   // Date format: "yyyy-MM-dd HH:mm:ss"
-
+    protected String timestamp;     // Date format: "yyyy-MM-dd HH:mm:ss"
+                                    // => modify to "yyyy-MM-ddTHH:mm:ss"
     protected String id;
     protected String label;
     protected String datasource;
