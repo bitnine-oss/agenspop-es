@@ -27,8 +27,8 @@ agens:
     username: elastic
     password: bitnine
     scroll-limit: -1            # -1(unlimit) or more than 2500
-    vertex-index: agensvertex
-    edge-index: agensedge
+    vertex-index: newsvertex
+    edge-index: newsedge
     edge-validation: false      # if true, check valid edge on each request (make slow)
     index-shards: 1             # when create index, apply to setting
     index-replicas: 1           # when create index, apply to setting
