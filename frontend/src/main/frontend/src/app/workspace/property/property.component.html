@@ -6,13 +6,20 @@
 		</div>
 		<div class="graphic mb-3">
 			<div class="d-flex">
+        <!--
         <span class="item icon" [disablePopover]="!canPopover" placement="bottom"
             [ngbPopover]="iconsContent" [popoverTitle]="iconsTitle" [autoClose]="'outside'" container="body">
-          <i *ngIf="currIcon" [ngClass]="['fas', 'fa-'+currIcon.name]" aria-hidden="true"></i></span>
+          <i *ngIf="currIcon" [ngClass]="['fas', 'fa-'+currIcon.name]" aria-hidden="true"></i>
+        </span>
+        -->
         <span class="item color" [style.background-color]="currColor" [disablePopover]="!canPopover" placement="bottom"
-          [ngbPopover]="paletteContent" [popoverTitle]="paletteTitle" [autoClose]="'outside'" container="body"></span>
+          [ngbPopover]="paletteContent" [popoverTitle]="paletteTitle" [autoClose]="'outside'" container="body">
+        </span>
+        <span *ngIf="isEdge" class="item color" [style.background-color]="currColor2" [disablePopover]="!canPopover" placement="bottom"
+          [ngbPopover]="paletteContent" [popoverTitle]="paletteTitle" [autoClose]="'outside'" container="body">
+        </span>
+        <span class="label type px-2">{{data.label}}</span>
       </div>
-      <span class="label type text-white px-2" [style.background-color]="currColor">{{data.label}}</span>
     </div>
     <!--
     <form class="search position-relative mb-3">

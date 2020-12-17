@@ -37,6 +37,9 @@ public class ElasticGraphService {
 
     static final String MAPPINGS_VERTEX = "classpath:mappings/vertex-document.json";
     static final String MAPPINGS_EDGE = "classpath:mappings/edge-document.json";
+    // bucket size of aggregation return
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size
+    static final int AGG_BUCKET_SIZE = 1000;
 
     public final String INDEX_VERTEX;
     public final String INDEX_EDGE;
@@ -139,12 +142,35 @@ public class ElasticGraphService {
     // REST API : Aggregation
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_metrics_aggregations.html
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_bucket_aggregations.html
+/*
+GET /newsvertex/_search?pretty
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+          { "term": {"datasource": "d11794281"} }
+      ]
+    }
+  },
+  "aggs": {
+    "labels": {
+      "terms": {
+        "field": "label", "size" : 1000
+      }
+    }
+  }
+}
+ */
 
     public Map<String, Long> listDatasources(String index) throws Exception {
         // query : aggregation
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery())
-                .aggregation(AggregationBuilders.terms("datasources").field("datasource").order(BucketOrder.key(true)));
+                .aggregation(AggregationBuilders.terms("datasources")
+                        .field("datasource").order(BucketOrder.key(true))
+                        .size(AGG_BUCKET_SIZE)
+                ).size(0);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);
@@ -166,7 +192,10 @@ public class ElasticGraphService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.boolQuery()
                 .filter(termQuery("datasource", datasource)))
-                .aggregation(AggregationBuilders.terms("labels").field("label").order(BucketOrder.key(true)));
+                .aggregation(AggregationBuilders.terms("labels")
+                        .field("label").order(BucketOrder.key(true))
+                        .size(AGG_BUCKET_SIZE)
+                ).size(0);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);
@@ -195,8 +224,9 @@ public class ElasticGraphService {
                         AggregationBuilders.terms("keys").field("properties.key")
                             .subAggregation(
                                 AggregationBuilders.reverseNested("label_to_key")
-                            )
-                    ));
+                            ).size(AGG_BUCKET_SIZE)
+                    )
+                ).size(0);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);

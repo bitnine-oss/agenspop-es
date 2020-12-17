@@ -62,7 +62,7 @@ export const CY_STYLES = [
     "border-color": "black",
     "border-width": 1,
   }}, {
-  "selector": "node.caption",
+  "selector": "node.captionId",
   "css": {
     'content': 'data(id)',
     'text-wrap': 'wrap',
@@ -70,6 +70,24 @@ export const CY_STYLES = [
     'text-opacity': 0.6,
     'font-weight': 400,
     'font-size': 10
+  }}, {
+  "selector": "node.captionLabel",
+  "css": {
+    'content': 'data(label)',
+    'text-wrap': 'wrap',
+    'text-max-width': '80px',
+    'text-opacity': 0.6,
+    'font-weight': 400,
+    'font-size': 10
+  }}, {
+    "selector": "node.captionName",
+    "css": {
+      'content': function(e){ return e.data('properties').hasOwnProperty('name') ? e.data('properties')['name'] : ''; },
+      'text-wrap': 'wrap',
+      'text-max-width': '80px',
+      'text-opacity': 0.6,
+      'font-weight': 400,
+      'font-size': 10
   }}, {
   "selector": "node.icon",
   "css": {

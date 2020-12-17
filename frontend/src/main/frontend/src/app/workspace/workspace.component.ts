@@ -46,10 +46,10 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   @ViewChild('headerComponent', {static: false}) private headerComponent: HeaderComponent;
   @ViewChild('webglScreen', {static: false}) private webglScreen: WebglComponent;
   @ViewChild('canvasScreen', {static: false}) private canvasScreen: CanvasComponent;
-  private readonly screens:any = {
-    'webgl' : this.webglScreen,
-    'canvas': this.canvasScreen
-  };
+  // private readonly screens:any = {
+  //   'webgl' : this.webglScreen,
+  //   'canvas': this.canvasScreen
+  // };
 
   // for display
   dispLabels:ILabels = { nodes: [], edges: [] };
@@ -528,7 +528,6 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   selectLabel(index:string, label:any){
-    // (this.screens[this.screenMode]).selectLabel(index, label);   // <== CANNOT!
     if( this.screenMode == 'webgl'){
       this.webglScreen.selectLabel(index, label);
     }

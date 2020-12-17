@@ -1,4 +1,4 @@
-export const DEV_MODE: boolean = false;  // false if integration version
+export const DEV_MODE: boolean = true;  // false if integration version
 
 ///////////////////////////////////////////////////////////////
 

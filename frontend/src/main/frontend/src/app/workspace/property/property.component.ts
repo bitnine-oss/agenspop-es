@@ -15,12 +15,14 @@ export class PropertyComponent implements OnInit {
   icons:any[] = PALETTE_ICON;
 
   currIcon:any = undefined;
-  currColor:string = '#DCDCDC';   // gainsboro
+  currColor:string = '#DCDCDC';
+  currColor2:string = '#0A0A0A';
   @Output() changeStyleEmitter= new EventEmitter<IEvent>();
 
   //public panelInfo: any = {}; // NodeInfo = new NodeInfo();
   togglePanel:boolean = false;
 
+  isEdge:boolean = false;
   target:any = undefined;
   data:any = undefined;
   features:any = undefined;
@@ -47,10 +49,21 @@ export class PropertyComponent implements OnInit {
     this.features = Object.entries(e.scratch).map(([k,v]) => ({key: k, value: v}))
             .filter(x=> (<string>x.key).startsWith('_$$'));
             // .map(x=> x.key = x.key.substr(3));
-    this.currColor = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'] : '#DCDCDC';
+
+    // edge 의 경우 '_color' 값이 array[2]로 온다
+    if (Array.isArray(e.scratch['_color'])) {
+      this.currColor = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'][0] : '#DCDCDC';  // 회색
+      this.currColor2 = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'][1] : '#0A0A0A'; // 검정
+      this.isEdge = true;
+    }
+    else{
+      this.currColor = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'] : '#DCDCDC';
+      this.isEdge = false;
+    }
+
     this.currIcon = e.scratch.hasOwnProperty('_icon') ? e.scratch['_icon'] : undefined;
     this.togglePanel = true;
-	}
+  }
 
 	public hidePanel() {
     this.togglePanel = false;

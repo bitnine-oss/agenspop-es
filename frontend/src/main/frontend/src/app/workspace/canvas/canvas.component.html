@@ -52,9 +52,25 @@
       <small>Orphans</small>
     </ng-template>
   </context-menu>
-  <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item)">
+
+  <ng-template contextMenuItem [subMenu]="selectCaptionMenu">
     <small>Toggle captions</small>
   </ng-template>
+  <context-menu #selectCaptionMenu>
+    <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item,'id')">
+      <small>id</small>
+    </ng-template>
+    <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item,'label')">
+      <small>label</small>
+    </ng-template>
+    <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item,'name')">
+      <small>name</small>
+    </ng-template>
+    <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item,'hide')">
+      <small>HIDE</small>
+    </ng-template>
+  </context-menu>
+
   <ng-template contextMenuItem [visible]="ctxMenuActions.existSelect" (execute)="ctxMenuActions.invertSelect($event.item)">
     <small>Invert selection</small>
   </ng-template>

@@ -5,6 +5,7 @@ import { map, share, tap, catchError, concatAll, timeout } from 'rxjs/operators'
 import * as _ from 'lodash';
 
 import { IElement } from '../models/agens-graph-types';
+import { DEV_MODE } from '../app.config';
 
 const TIMEOUT_LIMIT:number = 9999;
 
@@ -15,7 +16,10 @@ export class ApApiService {
 
   apiUrl = `${window.location.protocol}//${window.location.host}`;
 
-  constructor(private _http: HttpClient) {}
+  constructor(private _http: HttpClient) {
+    // for DEBUG
+    if( DEV_MODE ) this.apiUrl = 'http://localhost:8080';
+  }
 
   // meta query
   // http://27.117.163.21:15632/api/admin/config

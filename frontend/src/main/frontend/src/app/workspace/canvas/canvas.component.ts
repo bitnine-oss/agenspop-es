@@ -134,9 +134,15 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       if( eles.size() == 0 ) return;
       this.ur.do('remove', eles);    // cy.remove(eles);
     },
-    toggleCaption: (cy:any)=>{
-      if( cy.nodes().first().hasClass('caption') ) cy.nodes().removeClass('caption');
-      else cy.nodes().addClass('caption');
+    toggleCaption: (cy:any, select:string)=>{
+      if( select == 'id' ) cy.nodes().addClass('captionId');
+      else if( select == 'label' ) cy.nodes().addClass('captionLabel');
+      else if( select == 'name' ) cy.nodes().addClass('captionName');
+      else{
+        cy.nodes().removeClass('captionId');
+        cy.nodes().removeClass('captionLabel');
+        cy.nodes().removeClass('captionName');
+      }
     }
   };
   @ViewChild('cyMenu', {static: false}) public cyMenu: ContextMenuComponent;
