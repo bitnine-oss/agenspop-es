@@ -529,7 +529,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.lastHighlighted != null;
   }
   private promiseDelay(duration){
-    return new Promise(function(resolve, reject){
+    return new Promise<void>(function(resolve, reject){
       setTimeout(function(){ resolve(); }, duration)    // delay
     });
   }

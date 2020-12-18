@@ -66,6 +66,7 @@
     <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item,'name')">
       <small>name</small>
     </ng-template>
+    <ng-template contextMenuItem [visible]="ctxMenuActions.notExistSelect" divider="true"></ng-template>
     <ng-template contextMenuItem (execute)="ctxMenuActions.toggleCaption($event.item,'hide')">
       <small>HIDE</small>
     </ng-template>

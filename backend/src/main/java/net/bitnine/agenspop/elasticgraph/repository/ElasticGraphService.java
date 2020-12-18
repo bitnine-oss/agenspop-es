@@ -142,26 +142,6 @@ public class ElasticGraphService {
     // REST API : Aggregation
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_metrics_aggregations.html
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_bucket_aggregations.html
-/*
-GET /newsvertex/_search?pretty
-{
-  "size": 0,
-  "query": {
-    "bool": {
-      "must": [
-          { "term": {"datasource": "d11794281"} }
-      ]
-    }
-  },
-  "aggs": {
-    "labels": {
-      "terms": {
-        "field": "label", "size" : 1000
-      }
-    }
-  }
-}
- */
 
     public Map<String, Long> listDatasources(String index) throws Exception {
         // query : aggregation
@@ -245,3 +225,86 @@ GET /newsvertex/_search?pretty
     }
 
 }
+
+
+/*
+GET /newsvertex/_search?pretty
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+          { "term": {"datasource": "d11794281"} }
+      ]
+    }
+  },
+  "aggs": {
+    "labels": {
+      "terms": {
+        "field": "label", "size" : 1000
+      }
+    }
+  }
+}
+ */
+/*
+    // 한글 검색 : 'korean' analyzer and nested field
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-nested-query.html
+    // 이렇게 해도 됨 ==> { "match": { "properties.value.korean": "검찰" } }
+
+    // ** 추가
+    // datasource 내에 어떤 label 이 있는지 모르므로, 검색 결과에 대한 datasource 리스트를 만들고 싶다면,
+    // 1) 먼저 aggs 의 결과로 datasource 리스트를 만들고
+    // 2) datasource 리스트 대상으로 vertex 와 edge 카운트를 가져와야 함
+     
+GET /newsvertex/_search?pretty
+{
+  "size": 0,
+  "query": {
+    "nested": {
+      "path": "properties",
+      "query": {
+        "bool": {
+          "must": [
+            { "match": { "properties.value": "검찰" } }
+          ]
+        }
+      },
+      "score_mode": "avg"
+    }
+  },
+  "aggs": {
+    "labels": {
+      "terms": {
+        "field": "datasource", "size" : 100
+      }
+    }
+  }
+}
+
+# ** nested 와 non-nested 필드들의 혼합 쿼리
+# https://stackoverflow.com/a/58621114
+
+GET newsvertex/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "label": "document" } },
+        { "nested": {
+            "path": "properties",
+            "query": {
+              "bool": {
+                "must": [
+                  { "match": { "properties.value": "검찰" } }
+                ]
+              }
+            },
+            "score_mode": "avg"
+          }
+        }
+      ]
+    }
+  }
+}
+ */

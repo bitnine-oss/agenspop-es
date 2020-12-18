@@ -16,6 +16,7 @@ export class PropertyComponent implements OnInit {
 
   currIcon:any = undefined;
   currColor:string = '#DCDCDC';
+  currColor1:string = '#DCDCDC';
   currColor2:string = '#0A0A0A';
   @Output() changeStyleEmitter= new EventEmitter<IEvent>();
 
@@ -26,6 +27,9 @@ export class PropertyComponent implements OnInit {
   target:any = undefined;
   data:any = undefined;
   features:any = undefined;
+
+  source_label:string = 'none'
+  target_label:string = 'none'
 
   currMode:string;
   canPopover:boolean = false;
@@ -43,6 +47,7 @@ export class PropertyComponent implements OnInit {
 
 	public showPanel(e:IElement) {
     this.target = e;
+    // 색변경 팔레트 팝업하기 (캔버스에서만 작동)
     this.canPopover = (this.currMode == 'canvas' && e.group == 'nodes');
 
     this.data = e.data;
@@ -52,9 +57,12 @@ export class PropertyComponent implements OnInit {
 
     // edge 의 경우 '_color' 값이 array[2]로 온다
     if (Array.isArray(e.scratch['_color'])) {
-      this.currColor = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'][0] : '#DCDCDC';  // 회색
+      this.currColor1 = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'][0] : '#DCDCDC';  // 회색
       this.currColor2 = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'][1] : '#0A0A0A'; // 검정
       this.isEdge = true;
+      console.log('showPanel:', e.scratch);
+      if( e.scratch['_source'] ) this.source_label = e.scratch['_source']['data']['label'];
+      if( e.scratch['_target'] ) this.target_label = e.scratch['_target']['data']['label'];
     }
     else{
       this.currColor = e.scratch.hasOwnProperty('_color') ? e.scratch['_color'] : '#DCDCDC';
