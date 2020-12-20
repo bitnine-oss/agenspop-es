@@ -433,6 +433,12 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cyPrevEvent = evt;
   }
 
+  cyUnselectedFade(){
+    setTimeout(()=>{
+      this.cy.elements(':unselected').addClass('faded');
+    }, 10);
+  }
+
   cyElementClick(target:any){
     let e = target.size() > 1 ? target.first() : target;
     let json = <IElement>e.json();      // expand 된 개체는 g 모체에 없기 때문에 직접 추출

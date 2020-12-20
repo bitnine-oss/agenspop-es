@@ -520,10 +520,16 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
         this.canvasScreen.selectLabel('v', item.value);
       else if( item.vtype == 'edge-label' )
         this.canvasScreen.selectLabel('e', item.value);
-      else if( item.vtype == 'node' )
+      else if( item.vtype == 'node' ){
         this.canvasScreen.selectElement('v', item.value);
-      else if( item.vtype == 'edge' )
+        // 원래 여기 있으면 안되는 코드지만, 후일로 미룬다 (canvas 쪽으로 이동할 것)
+        this.canvasScreen.cyUnselectedFade();
+      }
+      else if( item.vtype == 'edge' ){
         this.canvasScreen.selectElement('e', item.value);
+        // search 에서 넘어온 것인지 구분해야 해서 더티해짐
+        this.canvasScreen.cyUnselectedFade();
+      }
     }
   }
 

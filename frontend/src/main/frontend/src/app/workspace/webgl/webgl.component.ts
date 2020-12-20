@@ -337,8 +337,10 @@ export class WebglComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if( index == 'v' ){
       let e = this.model.nodes[target.scratch._idx];
-      this.el.selectNode(target.scratch._idx);
       this.elNodeClick(e);
+      // 시각적 효과: 다른 라벨은 회색 처리하고, 선택 노드는 검정 테두리 강조
+      this.el.selectGroup(target.scratch._label.idx);
+      this.el.selectNode(target.scratch._idx);
     }
   }
 

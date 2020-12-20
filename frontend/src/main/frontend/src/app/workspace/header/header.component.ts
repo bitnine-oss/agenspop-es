@@ -35,16 +35,16 @@ export class HeaderComponent implements OnInit {
 	searchResults:ISearch[] = [];
 	private isSearching:boolean = false;
 
-  undoable: boolean = false;
-  @Input() set changeUndo(state:boolean){
-    this.undoable = state;
-    // this._cd.detectChanges();
-  }
-  redoable: boolean = false;
-  @Input() set changeRedo(state:boolean){
-    this.redoable = state;
-    // this._cd.detectChanges();
-  }
+	undoable: boolean = false;
+	@Input() set changeUndo(state:boolean){
+		this.undoable = state;
+		// this._cd.detectChanges();
+	}
+	redoable: boolean = false;
+	@Input() set changeRedo(state:boolean){
+		this.redoable = state;
+		// this._cd.detectChanges();
+	}
 
 	nextScreenMode:string;
 	@Input() set screenMode(mode:string) {
@@ -122,7 +122,16 @@ export class HeaderComponent implements OnInit {
   }
 
 	///////////////////////////////////////////////////
-	// search
+	// search datasources by query
+	//
+
+	searchDatasources(value){
+		console.log('search datasources:', value);		// when enter key
+
+	}
+
+	///////////////////////////////////////////////////
+	// search elements or values
 	// **REF. https://www.freakyjolly.com/angular-simple-typeahead-autocomplete-suggestion-search-implementation-in-angular-6-applications/
 
 	selectedSearch($event){

@@ -41,6 +41,8 @@ export const CY_STYLES = [
     "border-width": 4,
     "background-color": "#FFFFFF",   // not working, why??
     "z-index": 9,
+    "width": 24,
+    "height": 24,
     // "border-color": function(e){ return e.scratch('_color'); },
   }},{
   "selector": "node.highlighted",
