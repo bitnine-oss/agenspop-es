@@ -100,8 +100,8 @@ export class HeaderComponent implements OnInit {
       map((event: any) => {
         return event.target.value;
       })
-      , filter(res => res.length > 2)
-      , debounceTime(1000)
+      //, filter(res => res.length >= 2)		// 길이가 1이면 아예 작동을 안함
+      , debounceTime(1200)
       // If previous query is diffent from current
       , distinctUntilChanged()
       // subscription for response
@@ -125,9 +125,11 @@ export class HeaderComponent implements OnInit {
 	// search datasources by query
 	//
 
-	searchDatasources(value){
-		console.log('search datasources:', value);		// when enter key
-
+	searchDatasources(query:string){
+		console.log('search datasources:', query);		// when enter key
+		this.apApiService.searchDatasources(query).subscribe(x => {	// callback
+			this.datasources = Object.keys(x).map(r => ({name: r, desc: x[r]}) );
+		});
 	}
 
 	///////////////////////////////////////////////////

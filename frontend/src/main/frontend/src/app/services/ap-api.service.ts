@@ -38,6 +38,14 @@ export class ApApiService {
   }
 
   // meta query
+  // http://27.117.163.21:15632/api/admin/graphs/search/{query}
+  public searchDatasources(query:string) {
+    let uri = this.apiUrl+'/api/admin/graphs/search/'+query;
+    let headers = new HttpHeaders({'Content-Type': 'application/json'});
+    return this._http.get<any>( uri, { headers : headers });
+  }
+
+  // meta query
   // http://27.117.163.21:15632/api/admin/labels/modern
   public findLabelsByDatasource(datasource:string) {
     let uri = this.apiUrl+'/api/admin/labels/'+datasource;
@@ -47,7 +55,7 @@ export class ApApiService {
 
   // gremlin query
   // http://27.117.163.21:15632/api/graph/gremlin?q=modern_g.V()
-  public gremlinQuery(query) {
+  public gremlinQuery(query:string) {
     let uri = this.apiUrl+'/api/graph/gremlin?q='+query;
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     return this._http.get<IElement[]>( uri, { headers : headers })

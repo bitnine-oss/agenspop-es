@@ -145,16 +145,44 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     //
 
     @Override
+    public List<String> searchDatasources(String query) {
+        try {
+            return graph.searchDatasources(config.getVertexIndex(), query);
+        }
+        catch (Exception e) { return Collections.EMPTY_LIST; }
+    }
+    @Override
+    public Map<String, Long> searchVertexDatasources(List<String> dsList) {
+        try {
+            if( dsList.isEmpty() )
+                return graph.listDatasources(config.getVertexIndex(), null);
+            else
+                return graph.listDatasources(config.getVertexIndex(), dsList);
+        }
+        catch (Exception e) { return Collections.EMPTY_MAP; }
+    }
+    @Override
+    public Map<String, Long> searchEdgeDatasources(List<String> dsList){
+        try {
+            if( dsList.isEmpty() )
+                return graph.listDatasources(config.getEdgeIndex(), null);
+            else
+                return graph.listDatasources(config.getEdgeIndex(), dsList);
+        }
+        catch (Exception e) { return Collections.EMPTY_MAP; }
+    }
+
+    @Override
     public Map<String, Long> listVertexDatasources() {
         try {
-            return graph.listDatasources(config.getVertexIndex());
+            return graph.listDatasources(config.getVertexIndex(), Collections.EMPTY_LIST);
         }
         catch (Exception e) { return Collections.EMPTY_MAP; }
     }
     @Override
     public Map<String, Long> listEdgeDatasources(){
         try {
-            return graph.listDatasources(config.getEdgeIndex());
+            return graph.listDatasources(config.getEdgeIndex(), Collections.EMPTY_LIST);
         }
         catch (Exception e) { return Collections.EMPTY_MAP; }
     }

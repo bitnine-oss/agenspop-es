@@ -68,6 +68,13 @@ public class ManagerController {
                 , AgensUtilHelper.productHeaders(productProperties), HttpStatus.OK);
     }
 
+    @GetMapping(value="/graphs/search/{query}", produces="application/json; charset=UTF-8")
+    public ResponseEntity searchGraphs(@PathVariable String query) throws Exception {
+        Map<String, String> graphs = manager.searchGraphs(query);
+        return new ResponseEntity(graphs
+                , AgensUtilHelper.productHeaders(productProperties), HttpStatus.OK);
+    }
+
     @GetMapping(value="/labels/{datasource}", produces="application/json; charset=UTF-8")
     public ResponseEntity listLabels(@PathVariable String datasource) throws Exception {
         Map<String,Map<String,Long>> labels = manager.getGraphLabels(datasource);
