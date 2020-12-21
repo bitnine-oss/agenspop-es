@@ -6,6 +6,7 @@ import net.bitnine.agenspop.basegraph.model.BaseVertex;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -47,6 +48,10 @@ public interface BaseGraphAPI {
 
     long countV(String datasource);
     long countE(String datasource);
+
+    List<String> searchDatasources(String query);
+    Map<String, Long> searchVertexDatasources(List<String> dsList);
+    Map<String, Long> searchEdgeDatasources(List<String> dsList);
 
     Map<String, Long> listVertexDatasources();
     Map<String, Long> listEdgeDatasources();

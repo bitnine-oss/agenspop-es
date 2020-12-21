@@ -35,16 +35,16 @@ export class HeaderComponent implements OnInit {
 	searchResults:ISearch[] = [];
 	private isSearching:boolean = false;
 
-  undoable: boolean = false;
-  @Input() set changeUndo(state:boolean){
-    this.undoable = state;
-    // this._cd.detectChanges();
-  }
-  redoable: boolean = false;
-  @Input() set changeRedo(state:boolean){
-    this.redoable = state;
-    // this._cd.detectChanges();
-  }
+	undoable: boolean = false;
+	@Input() set changeUndo(state:boolean){
+		this.undoable = state;
+		// this._cd.detectChanges();
+	}
+	redoable: boolean = false;
+	@Input() set changeRedo(state:boolean){
+		this.redoable = state;
+		// this._cd.detectChanges();
+	}
 
 	nextScreenMode:string;
 	@Input() set screenMode(mode:string) {
@@ -100,8 +100,8 @@ export class HeaderComponent implements OnInit {
       map((event: any) => {
         return event.target.value;
       })
-      , filter(res => res.length > 2)
-      , debounceTime(1000)
+      //, filter(res => res.length >= 2)		// 길이가 1이면 아예 작동을 안함
+      , debounceTime(1200)
       // If previous query is diffent from current
       , distinctUntilChanged()
       // subscription for response
@@ -122,7 +122,18 @@ export class HeaderComponent implements OnInit {
   }
 
 	///////////////////////////////////////////////////
-	// search
+	// search datasources by query
+	//
+
+	searchDatasources(query:string){
+		console.log('search datasources:', query);		// when enter key
+		this.apApiService.searchDatasources(query).subscribe(x => {	// callback
+			this.datasources = Object.keys(x).map(r => ({name: r, desc: x[r]}) );
+		});
+	}
+
+	///////////////////////////////////////////////////
+	// search elements or values
 	// **REF. https://www.freakyjolly.com/angular-simple-typeahead-autocomplete-suggestion-search-implementation-in-angular-6-applications/
 
 	selectedSearch($event){

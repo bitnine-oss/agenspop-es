@@ -2,6 +2,7 @@ package net.bitnine.agenspop.elasticgraph.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -12,6 +13,8 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -26,17 +29,20 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 
 @Slf4j
 public class ElasticGraphService {
 
     static final String MAPPINGS_VERTEX = "classpath:mappings/vertex-document.json";
     static final String MAPPINGS_EDGE = "classpath:mappings/edge-document.json";
+    // bucket size of aggregation return
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size
+    static final int AGG_BUCKET_SIZE = 1000;
 
     public final String INDEX_VERTEX;
     public final String INDEX_EDGE;
@@ -140,11 +146,20 @@ public class ElasticGraphService {
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_metrics_aggregations.html
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_bucket_aggregations.html
 
-    public Map<String, Long> listDatasources(String index) throws Exception {
+    public Map<String, Long> listDatasources(String index, List<String> dsList) throws Exception {
+        // when search graphs by query, if no match then return empty
+        if(dsList == null) return Collections.EMPTY_MAP;
+
         // query : aggregation
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery())
-                .aggregation(AggregationBuilders.terms("datasources").field("datasource").order(BucketOrder.key(true)));
+        // match to datasource
+        QueryBuilder queryBuilder = dsList.isEmpty() ? QueryBuilders.matchAllQuery()
+                : QueryBuilders.boolQuery().filter(termsQuery("datasource", dsList));
+        searchSourceBuilder.query(queryBuilder)
+                .aggregation(AggregationBuilders.terms("datasources")
+                        .field("datasource").order(BucketOrder.key(true))
+                        .size(AGG_BUCKET_SIZE)
+                ).size(0);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);
@@ -166,7 +181,10 @@ public class ElasticGraphService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.boolQuery()
                 .filter(termQuery("datasource", datasource)))
-                .aggregation(AggregationBuilders.terms("labels").field("label").order(BucketOrder.key(true)));
+                .aggregation(AggregationBuilders.terms("labels")
+                        .field("label").order(BucketOrder.key(true))
+                        .size(AGG_BUCKET_SIZE)
+                ).size(0);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);
@@ -195,8 +213,9 @@ public class ElasticGraphService {
                         AggregationBuilders.terms("keys").field("properties.key")
                             .subAggregation(
                                 AggregationBuilders.reverseNested("label_to_key")
-                            )
-                    ));
+                            ).size(AGG_BUCKET_SIZE)
+                    )
+                ).size(0);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);
@@ -214,4 +233,119 @@ public class ElasticGraphService {
         return result;
     }
 
+    // query 에 매칭되는 datasource list 만 반환한다
+    public List<String> searchDatasources(String index, String query) throws Exception {
+        // query : match and aggregation
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        // define : nested query
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.nestedQuery("properties",
+                    QueryBuilders.boolQuery().must(
+                            QueryBuilders.queryStringQuery("properties.value:\"" + query.toLowerCase() + "\""))
+                    , ScoreMode.Total));
+        // append : aggregation
+        searchSourceBuilder.query(queryBuilder)
+                .aggregation(AggregationBuilders.terms("datasources")
+                        .field("datasource").order(BucketOrder.key(true))
+                        .size(AGG_BUCKET_SIZE)
+                ).size(0);
+
+        // request
+        SearchRequest searchRequest = new SearchRequest(index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        // response
+        Aggregations aggregations = searchResponse.getAggregations();
+        Terms labels = aggregations.get("datasources");
+
+        List<String> result = new ArrayList<>();
+        labels.getBuckets().forEach(b->{
+            result.add(b.getKeyAsString());
+        });
+        return result;
+    }
+
 }
+
+
+/*
+GET /newsvertex/_search?pretty
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+          { "term": {"datasource": "d11794281"} }
+      ]
+    }
+  },
+  "aggs": {
+    "labels": {
+      "terms": {
+        "field": "label", "size" : 1000
+      }
+    }
+  }
+}
+ */
+/*
+    // 한글 검색 : 'korean' analyzer and nested field
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-nested-query.html
+    // 이렇게 해도 됨 ==> { "match": { "properties.value.korean": "검찰" } }
+
+    // ** 추가
+    // datasource 내에 어떤 label 이 있는지 모르므로, 검색 결과에 대한 datasource 리스트를 만들고 싶다면,
+    // 1) 먼저 aggs 의 결과로 datasource 리스트를 만들고
+    // 2) datasource 리스트 대상으로 vertex 와 edge 카운트를 가져와야 함
+
+GET /newsvertex/_search?pretty
+{
+  "size": 0,
+  "query": {
+    "nested": {
+      "path": "properties",
+      "query": {
+        "bool": {
+          "must": [
+            { "match": { "properties.value": "검찰" } }
+          ]
+        }
+      },
+      "score_mode": "avg"
+    }
+  },
+  "aggs": {
+    "labels": {
+      "terms": {
+        "field": "datasource", "size" : 100
+      }
+    }
+  }
+}
+
+# ** nested 와 non-nested 필드들의 혼합 쿼리
+# https://stackoverflow.com/a/58621114
+
+GET newsvertex/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "label": "document" } },
+        { "nested": {
+            "path": "properties",
+            "query": {
+              "bool": {
+                "must": [
+                  { "match": { "properties.value": "검찰" } }
+                ]
+              }
+            },
+            "score_mode": "avg"
+          }
+        }
+      ]
+    }
+  }
+}
+ */

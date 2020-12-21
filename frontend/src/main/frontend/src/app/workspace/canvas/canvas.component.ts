@@ -134,9 +134,15 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       if( eles.size() == 0 ) return;
       this.ur.do('remove', eles);    // cy.remove(eles);
     },
-    toggleCaption: (cy:any)=>{
-      if( cy.nodes().first().hasClass('caption') ) cy.nodes().removeClass('caption');
-      else cy.nodes().addClass('caption');
+    toggleCaption: (cy:any, select:string)=>{
+      if( select == 'id' ) cy.nodes().addClass('captionId');
+      else if( select == 'label' ) cy.nodes().addClass('captionLabel');
+      else if( select == 'name' ) cy.nodes().addClass('captionName');
+      else{
+        cy.nodes().removeClass('captionId');
+        cy.nodes().removeClass('captionLabel');
+        cy.nodes().removeClass('captionName');
+      }
     }
   };
   @ViewChild('cyMenu', {static: false}) public cyMenu: ContextMenuComponent;
@@ -427,6 +433,12 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cyPrevEvent = evt;
   }
 
+  cyUnselectedFade(){
+    setTimeout(()=>{
+      this.cy.elements(':unselected').addClass('faded');
+    }, 10);
+  }
+
   cyElementClick(target:any){
     let e = target.size() > 1 ? target.first() : target;
     let json = <IElement>e.json();      // expand 된 개체는 g 모체에 없기 때문에 직접 추출
@@ -523,7 +535,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.lastHighlighted != null;
   }
   private promiseDelay(duration){
-    return new Promise(function(resolve, reject){
+    return new Promise<void>(function(resolve, reject){
       setTimeout(function(){ resolve(); }, duration)    // delay
     });
   }

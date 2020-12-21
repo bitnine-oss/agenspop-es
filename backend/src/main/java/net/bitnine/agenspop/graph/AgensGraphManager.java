@@ -250,6 +250,19 @@ public class AgensGraphManager implements GraphManager {
 
     public Map<String,String> getGraphStates(){ return this.graphStates; }
 
+    public Map<String,String> searchGraphs(String query){
+        List<String> dsList = baseAPI.searchDatasources(query);
+        // get datasources with vertex size and edge size
+        Map<String, Long> dsVlist = baseAPI.searchVertexDatasources(dsList);
+        Map<String, Long> dsElist = baseAPI.searchEdgeDatasources(dsList);
+        // graphs
+        Map<String,String> result = new HashMap<>();
+        for(Map.Entry<String, Long> ds : dsVlist.entrySet() ){
+            result.put(ds.getKey(), ds.getKey()+"[V="+ds.getValue()+",E="+dsElist.getOrDefault(ds.getKey(), 0L)+"]");
+        }
+        return result;
+    }
+
     public Map<String,Map<String,Long>> getGraphLabels(String datasource){
         Map<String,Map<String,Long>> agg = new HashMap<>();
         agg.put("V", baseAPI.listVertexLabels(datasource));
