@@ -4,6 +4,7 @@ import { debounceTime } from 'rxjs/operators';
 
 import { IElement, IGraph, EMPTY_GRAPH, ILabels, ILabel } from 'src/app/models/agens-graph-types';
 import { CY_STYLES, CY_EVT_INIT } from 'src/app/utils/cy-styles';
+import { PALETTE_DARK, PALETTE_BRIGHT } from 'src/app/utils/palette-colors';
 import { ApApiService } from 'src/app/services/ap-api.service';
 import { IEvent } from 'src/app/models/agens-data-types';
 
@@ -87,6 +88,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   tappedCount:number = 0;
 
   // ctxmenu example
+  ctxLoaded: boolean = false;
   ctxUserActions:ICtxMenuItem[] = [];
   ctxMenuActions:any = {
     notExistSelect: ()=>{
@@ -105,7 +107,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       else{ eles = cy.nodes(); }
 
       Promise.resolve().then(()=>{
-        eles.grabify();
+        // eles.grabify();
         eles.select();
       });
     },
@@ -113,17 +115,17 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       let eles = cy.$(':selected');
       if( eles.size() == 0 ) return;
       Promise.resolve().then(()=>{
-        cy.$('node:unselected').grabify();
+        // cy.$('node:unselected').grabify();
         cy.$('node:unselected').select();
       }).then(()=>{
-        eles.ungrabify();
+        // eles.ungrabify();
         eles.unselect();
       });
     },
     isolateSelect: (cy:any)=>{
       let eles = cy.$(':selected');
       if( eles.size() == 0 ) return;
-      Promise.resolve().then(()=>{        
+      Promise.resolve().then(()=>{
         this.ur.do('remove', cy.$('node:unselected'));  // cy.remove( cy.$('node:unselected') );
       }).then(()=>{
         eles.unselect();
@@ -135,14 +137,25 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       this.ur.do('remove', eles);    // cy.remove(eles);
     },
     toggleCaption: (cy:any, select:string)=>{
-      if( select == 'id' ) cy.nodes().addClass('captionId');
-      else if( select == 'label' ) cy.nodes().addClass('captionLabel');
-      else if( select == 'name' ) cy.nodes().addClass('captionName');
-      else{
-        cy.nodes().removeClass('captionId');
-        cy.nodes().removeClass('captionLabel');
-        cy.nodes().removeClass('captionName');
-      }
+
+        Promise.resolve()
+        .then( ()=>{
+            cy.nodes().removeClass('captionId');
+            cy.nodes().removeClass('captionLabel');
+            cy.nodes().removeClass('captionName');
+        })
+        .then( ()=>{
+            if( select == 'id' ) cy.nodes().addClass('captionId');
+            else if( select == 'label' ) cy.nodes().addClass('captionLabel');
+            else if( select == 'name' ) cy.nodes().addClass('captionName');
+            else if( select == 'name,label' ) cy.nodes().addClass('captionNameLabel');
+            else{
+                cy.nodes().removeClass('captionId');
+                cy.nodes().removeClass('captionLabel');
+                cy.nodes().removeClass('captionName');
+            }
+        });
+
     }
   };
   @ViewChild('cyMenu', {static: false}) public cyMenu: ContextMenuComponent;
@@ -218,7 +231,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private setStyleNode(e:any){
-    e.ungrabify();
+    // e.ungrabify();
     if( e.scratch('_color') ){
       e.style('background-color', e.scratch('_color'));
     }
@@ -277,10 +290,19 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if( localStorage.getItem('init-mode')=='canvas' ){
-      config.layout = { name: "random"
-        , fit: true, padding: 100, randomize: false, animate: false, positions: undefined
-        , zoom: undefined, pan: undefined, ready: undefined, stop: undefined
-      };
+        // 최초 layout: euler
+        config.layout = { name: "euler"
+        , fit: true, padding: 100, randomize: true, animate: false, positions: undefined
+        , zoom: undefined, pan: undefined, ready: undefined
+		, stop: function(event){
+            console.log('init-layoutstop: nodes.size =', event.target._private.cy.nodes().size());
+            // backup position of highlight targets
+            event.target._private.cy.nodes().forEach(n=>{
+              n.scratch('_pos', n.position());
+            });
+            event.target.removeAllListeners();
+          }
+        };
     }
     this.cy = window['cy'] = cytoscape(config);
 
@@ -321,7 +343,8 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       if( e.target === cy ){
         this.contextMenuService.show.next({
           anchorElement: cy.popperRef({renderedPosition: () => ({
-            x: e.originalEvent.offsetX-5, y: e.originalEvent.offsetY-5 }),}),
+            x: e.originalEvent.offsetX-5, y: e.originalEvent.offsetY-5
+          }), }),
           contextMenu: this.cyBgMenu,
           event: <MouseEvent>e.orignalEvent,
           item: e.target
@@ -329,6 +352,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       // **NOTE: ngx-contextmenu is FOOLISH! ==> do change another!
       else if( e.target.isNode() ){
+        this.ctxLoaded = false;
         this.listVertexNeighbors(e.target, ()=>{
           this.contextMenuService.show.next({
             anchorElement: e.target.popperRef(),
@@ -339,8 +363,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
 
-      e.preventDefault();
-      e.stopPropagation();
+      // https://github.com/isaacplmann/ngx-contextmenu/issues/45#issuecomment-321264693
+      // e.preventDefault();
+      // e.stopPropagation();
     });
 
     // ** 탭 이벤트를 cyEventsMapper()로 전달
@@ -376,9 +401,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }), 500);
 
-    cy.on('boxselect', _.debounce( (e)=>{
-      cy.$(':selected').nodes().grabify();
-    }), 500);
+    // cy.on('boxselect', _.debounce( (e)=>{
+    //   cy.$(':selected').nodes().grabify();
+    // }), 500);
 
     cy.on('dragfree','node', (e)=>{
       let pos = e.target.position();
@@ -394,7 +419,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     cy.on('unselect','node', (e)=>{
-      e.target.ungrabify();
+      // e.target.ungrabify();
       e.target.style('background-color', e.target.scratch('_color'));
       if( !e.target.hasClass('seed')) e.target.style('border-color', '#fff');
       if( e.target.hasClass('icon')) e.target.style('border-opacity', 0);
@@ -478,7 +503,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       eles = eles.union( eles.neighborhood() );
     }
 
-    eles.grabify();
+    // eles.grabify();
     eles.select();
   }
 
@@ -496,7 +521,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     // when label selection, the others set faded
     // ==> release faded style
     this.cy.batch(()=>{   // ==> without triggering redraws
-      this.cy.$('node:selected').ungrabify();
+      // this.cy.$('node:selected').ungrabify();
       if( !this.lastHighlighted ){
         this.cy.edges().removeClass('faded');
         this.cy.nodes().removeClass('faded');
@@ -711,6 +736,20 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     if( localStorage.getItem('debug')=='true' ) console.log('showEvent', event);
   }
 
+  private expandLabelV(lableName: string){
+    let next_idx = (_.maxBy(this.g.labels.nodes, (e)=>e.idx)).idx + 1;
+    let label:ILabel = {
+        idx: next_idx,
+        name: lableName,
+        size: 0,
+        total: 0,
+        elements: [],
+        color: PALETTE_DARK[next_idx%PALETTE_DARK.length]
+    }
+    this.g.labels.nodes.push( label );  // append new label
+    return label
+  }
+
   private expandNeighbors(event:any, target:any, nbrIds: string[]){
     let node = jQuery(event.target).is('small') ? jQuery(event.target) : jQuery(event.target).find('small');
     let selector = node.attr('prefix')+'.'+node.attr('label');
@@ -719,7 +758,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     let vids = [...nbrIds].concat( this.cy.nodes().map(x=>x.id()) );
     let eids = this.cy.edges().map(x=>x.id());
 
-    let nodes$ = this.apApiService.findByIds(this.g.datasource, 'v', nbrIds);
+    let nodes$ = this.apApiService.findByIds('v', nbrIds);
     let edges$ = this.apApiService.findEdgesOfVertices(this.g.datasource, vids);
     forkJoin([nodes$, edges$]).subscribe(results => {
       // filter new edges except exists edges
@@ -743,10 +782,12 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
       .then(()=>{
         nodes.forEach(e =>{
           let label:ILabel = _.find( this.g.labels.nodes, {name: e.data('label')} );
-          if( label ){
-            e.scratch('_color', label.color);
-            this.setStyleNode(e);
+          // 새로운 label 인 경우
+          if( !label ){
+            label = this.expandLabelV(e.data('label'));
           }
+          e.scratch('_color', label.color);
+          this.setStyleNode(e);
         });
         edges.forEach(e =>{
           let srcLabel:ILabel = _.find( this.g.labels.nodes, {name: e.source().data('label')} );
@@ -779,32 +820,45 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   listVertexNeighbors(e:any, callback:Function){
     this.ctxUserActions = [];
     this.apApiService.listVertexNeighbors(this.g.datasource, e.id()).subscribe(x=>{
-      // => { outgoers: { label: [vid...], ...}, incomers: { label: [vid...], ...} }
-      let excludeVids = e.neighborhood().map(v=>v.id());
-      let outgoers = _.map(x.outgoers, (vids, label) => ({
-        label: label, prefix: '_outgoers', click:(event,item)=>this.expandNeighbors(event, item, vids),
-        vids: vids.filter(v=>!excludeVids.includes(v))
-      }));
-      let incomers = _.map(x.incomers, (vids, label) => ({
-        label: label, prefix: '_incomers', click:(event,item)=>this.expandNeighbors(event, item, vids),
-        vids: vids.filter(v=>!excludeVids.includes(v))
-      }));
-      this.ctxUserActions.push(<ICtxMenuItem>{
-        label: 'outgoers', click:(event,item)=>console.log(event,item),
-        subActions: outgoers, size: outgoers.reduce((agg,v)=>agg+v.vids.length, 0)
-      });
-      this.ctxUserActions.push(<ICtxMenuItem>{
-        label: 'incomers', click:(event,item)=>console.log(event,item),
-        subActions: incomers, size: incomers.reduce((agg,v)=>agg+v.vids.length, 0)
-      });
+      Promise.resolve()
+      .then(()=>{
+        // => { outgoers: { label: [vid...], ...}, incomers: { label: [vid...], ...} }
+        let excludeVids = e.neighborhood().map(v=>v.id());
+        let outgoers = _.map(x.outgoers, (vids, label) => ({
+          label: label, prefix: '_outgoers', click:(event,item)=>this.expandNeighbors(event, item, vids),
+          vids: vids.filter(v=>!excludeVids.includes(v))
+        }));
+        let incomers = _.map(x.incomers, (vids, label) => ({
+          label: label, prefix: '_incomers', click:(event,item)=>this.expandNeighbors(event, item, vids),
+          vids: vids.filter(v=>!excludeVids.includes(v))
+        }));
 
-      // console.log('==>', this.ctxUserActions);
-      e.scratch('_outgoers', outgoers );
-      e.scratch('_outgoers.size', outgoers.length == 0 ? 0 : _.sumBy(outgoers, (x)=>x.vids.length) );
-      e.scratch('_incomers', incomers );
-      e.scratch('_incomers.size', incomers.length == 0 ? 0 : _.sumBy(incomers, (x)=>x.vids.length) );
+        this.ctxUserActions.push(<ICtxMenuItem>{
+          label: 'outgoers',
+          click:(event,item)=>console.log(event,item),
+          subActions: outgoers,
+          size: outgoers.reduce((agg,v)=>agg+v.vids.length, 0)
+        });
+        this.ctxUserActions.push(<ICtxMenuItem>{
+          label: 'incomers',
+          click:(event,item)=>console.log(event,item),
+          subActions: incomers,
+          size: incomers.reduce((agg,v)=>agg+v.vids.length, 0)
+        });
 
-      Promise.resolve().then(()=>this.cdr.detectChanges()).then(()=>callback.call(null));
+        // console.log('==>', this.ctxUserActions);
+        e.scratch('_outgoers', outgoers );
+        e.scratch('_outgoers.size', outgoers.length == 0 ? 0 : _.sumBy(outgoers, (x)=>x.vids.length) );
+        e.scratch('_incomers', incomers );
+        e.scratch('_incomers.size', incomers.length == 0 ? 0 : _.sumBy(incomers, (x)=>x.vids.length) );
+      })
+      .then(()=>{
+          this.ctxLoaded = true;
+          this.cdr.detectChanges();
+      })
+      .then(()=>{
+          callback.call(null);
+      });
     });
   }
 

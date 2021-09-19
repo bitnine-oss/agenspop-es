@@ -161,18 +161,6 @@ public final class ElasticEdgeService extends ElasticElementService {
         return doSearch(INDEX, size, queryBuilder, client, mapper, ElasticEdge.class);
     }
 
-    ///////////////////////////////////////////////////////////////
-    // APIs : withDateRange
-
-    public Stream<ElasticEdge> streamByIdsWithDateRange(String[] ids, String fromDate, String toDate) throws Exception {
-        return super.streamByIdsWithDateRange(INDEX, ElasticEdge.class, ids, fromDate, toDate);
-    }
-    public Stream<ElasticEdge> streamByDatasourceWithDateRange(String datasource, String fromDate, String toDate) throws Exception {
-        return super.streamByDatasourceWithDateRange(INDEX, ElasticEdge.class, datasource, fromDate, toDate);
-    }
-    public Stream<ElasticEdge> streamByDatasourceAndLabelWithDateRange(String datasource, String label, String fromDate, String toDate) throws Exception {
-        return super.streamByDatasourceAndLabelWithDateRange(INDEX, ElasticEdge.class, datasource, label, fromDate, toDate);
-    }
 
     ///////////////////////////////////////////////////////////////
     //

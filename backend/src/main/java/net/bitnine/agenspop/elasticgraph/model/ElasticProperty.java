@@ -43,7 +43,13 @@ public final class ElasticProperty implements BaseProperty {
             Class<?> clazz = Class.forName(type);
             translated = mapper.convertValue(value, clazz);
         }
-        catch (Exception e){ return null; }
+        catch (Exception e){
+            // **NOTE: java.util.List 처리 방안에 대해 고민이 필요하다
+            //      - Object 로 value 를 받으면 변환이 가능한 듯 (불러쓰는 여러 class 들을 모두 수정해야 함)
+            // System.out.printf("property: %s, %s, %s\n", key, type, value);
+            // this.type = "java.lang.String";
+            return value;
+        }
 
         return translated;
     }

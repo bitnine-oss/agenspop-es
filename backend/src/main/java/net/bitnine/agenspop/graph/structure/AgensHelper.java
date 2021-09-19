@@ -22,21 +22,6 @@ public final class AgensHelper {
 
     private AgensHelper() { }
 
-    // Function to filter Stream by from and to as datetime range
-    public static <T> Stream<T> filterStreamByDateRange(Stream<T> stream, LocalDateTime from, LocalDateTime to) {
-        return stream.filter(e->{
-            return e instanceof AgensVertex || e instanceof AgensEdge;
-        }).filter(e->{
-            BaseElement element = ((AgensElement)e).getBaseElement();
-            if( element.keys().contains(BaseElement.timestampTag) ){
-                LocalDateTime created = ElasticHelper.str2date(element.getProperty(BaseElement.timestampTag).valueOf());
-                if( created.isAfter(from) && created.isBefore(to) )
-                    return true;
-            }
-            return false;
-        });
-    }
-
     // Function to get the Stream
     public static <T> Stream<T> getStreamFromIterator(Iterator<T> iterator) {
         // Convert the iterator to Spliterator

@@ -14,3 +14,16 @@ fi
 
 echo "Run target jar: $jarfile ($cfgname)"
 nohup java -Xms2g -Xmx2g -jar $jarfile --spring.config.name=$cfgname > $targetpath/agenspop.log 2>&1 &
+sleep 2
+
+
+cd frontend/src/main/frontend
+# frontend: background running (node process)
+forever start node_modules/@angular/cli/bin/ng serve
+sleep 1
+cd ../../../..
+
+echo ""
+echo "open browser, ex) http://localhost:28082/workspace/D67109666"
+echo "[STOP]  $ forever stopall"
+echo ""

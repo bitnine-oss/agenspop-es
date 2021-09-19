@@ -145,9 +145,9 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     //
 
     @Override
-    public List<String> searchDatasources(String query) {
+    public List<String> searchDatasources(String query, String extField, String label) {
         try {
-            return graph.searchDatasources(config.getVertexIndex(), query);
+            return graph.searchDatasources(config.getVertexIndex(), query, extField, label);
         }
         catch (Exception e) { return Collections.EMPTY_LIST; }
     }
@@ -315,18 +315,12 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     }
     @Override
     public BaseProperty createProperty(String key, Object value){
-        if( key.equals(BaseElement.timestampTag)){
-            if( !ElasticHelper.checkDateformat(value.toString()) )
-                throw new IllegalArgumentException("Wrong date format: 'yyyy-MM-dd HH:mm:ss'");
-        }
         return new ElasticProperty(key, value);
     }
 
 
     @Override
     public boolean saveVertex(BaseVertex vertex){
-        ElasticHelper.setCreatedDate((ElasticElement)vertex);
-        vertex.removeProperty(BaseElement.timestampTag);    // not need to save as property
         System.out.println("saveVertex) "+vertex.getId()+" = "+vertex.keys());
         try{
             if( existsVertex(vertex.getId()) )
@@ -338,8 +332,6 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     }
     @Override
     public boolean saveEdge(BaseEdge edge){
-        ElasticHelper.setCreatedDate((ElasticElement)edge);
-        edge.removeProperty(BaseElement.timestampTag);      // not need to save as property
         System.out.println("saveEdge) "+edge.getId()+" = "+edge.keys());
         try{
             if( existsEdge(edge.getId()) )
@@ -387,30 +379,6 @@ public class ElasticGraphAPI implements BaseGraphAPI {
     //    has(key)                EQ  : findVerticesWithKey(ds, key)
     //    hasNot(key)             NEQ : findVerticesWithNotKey(ds, key)
 
-    ///////////////////////////////////////////////////////////////
-    //
-    // find edges for baseAPI
-    //
-    ///////////////////////////////////////////////////////////////
-
-    @Override
-    public Stream<BaseVertex> findVerticesWithDateRange(final String[] ids, String fromDate, String toDate){
-        try{
-            return vertices.streamByIdsWithDateRange(ids, fromDate, toDate).map(r->(BaseVertex)r);
-        } catch(Exception e){ return Stream.empty(); }
-    }
-    @Override
-    public Stream<BaseVertex> findVerticesWithDateRange(String datasource, String fromDate, String toDate){
-        try{
-            return vertices.streamByDatasourceWithDateRange(datasource, fromDate, toDate).map(r->(BaseVertex)r);
-        } catch(Exception e){ return Stream.empty(); }
-    }
-    @Override
-    public Stream<BaseVertex> findVerticesWithDateRange(String datasource, String label, String fromDate, String toDate){
-        try{
-            return vertices.streamByDatasourceAndLabelWithDateRange(datasource, label, fromDate, toDate).map(r->(BaseVertex)r);
-        } catch(Exception e){ return Stream.empty(); }
-    }
 
     ///////////////////////////////////////////////////////////////
     //
@@ -582,34 +550,6 @@ public class ElasticGraphAPI implements BaseGraphAPI {
         }
     }
 
-    ///////////////////////////////////////////////////////////////
-    //
-    // find edges for baseAPI
-    //
-    ///////////////////////////////////////////////////////////////
-
-    @Override
-    public Stream<BaseEdge> findEdgesWithDateRange(final String[] ids, String fromDate, String toDate){
-        try{
-            return edges.streamByIdsWithDateRange(ids, fromDate, toDate).map(r->(BaseEdge)r);
-        } catch(Exception e){ return Stream.empty(); }
-    }
-    @Override
-    public Stream<BaseEdge> findEdgesWithDateRange(String datasource, String fromDate, String toDate){
-        try{
-            Stream<BaseEdge> stream = edges.streamByDatasourceWithDateRange(datasource, fromDate, toDate).map(r->(BaseEdge)r);
-            return !config.isEdgeValidation() ? stream :
-                    ElasticHelper.filterValidEdges(vertices, datasource, stream);
-        } catch(Exception e){ return Stream.empty(); }
-    }
-    @Override
-    public Stream<BaseEdge> findEdgesWithDateRange(String datasource, String label, String fromDate, String toDate){
-        try{
-            Stream<BaseEdge> stream = edges.streamByDatasourceAndLabelWithDateRange(datasource, label, fromDate, toDate).map(r->(BaseEdge)r);
-            return !config.isEdgeValidation() ? stream :
-                    ElasticHelper.filterValidEdges(vertices, datasource, stream);
-        } catch(Exception e){ return Stream.empty(); }
-    }
 
     ///////////////////////////////////////////////////////////////
 

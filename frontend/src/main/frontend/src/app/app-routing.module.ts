@@ -5,14 +5,26 @@ import { WorkspaceComponent } from './workspace/workspace.component';
 // import { WorkspaceGardService } from "./services/workspace-gard.service";
 
 const routes: Routes = [
-  { path: '', redirectTo: '/workspace', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'workspace', component: WorkspaceComponent }
+    {
+        path: 'dashboard',
+        component: DashboardComponent
+    },
+    {
+        path: 'workspace/:ds', data: { mode: 'canvas', debug: false },
+        component: WorkspaceComponent
+    },
+    {
+        path: 'workspace',
+        component: WorkspaceComponent
+    },
+    {
+        path: '', redirectTo: '/workspace', pathMatch: 'full'
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forRoot(routes)],
+    exports: [RouterModule]
 })
 export class AppRoutingModule {
 

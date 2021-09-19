@@ -91,6 +91,18 @@ export const CY_STYLES = [
       'font-weight': 400,
       'font-size': 10
   }}, {
+    "selector": "node.captionNameLabel",
+    "css": {
+      'content': function(e){
+          return (e.data('properties').hasOwnProperty('name') ? e.data('properties')['name']+'\n' : '')
+                 +'('+e.data('label')+')';
+      },
+      'text-wrap': 'wrap',
+      'text-max-width': '80px',
+      'text-opacity': 0.6,
+      'font-weight': 400,
+      'font-size': 10
+  }}, {
   "selector": "node.icon",
   "css": {
     // "border-width": 0,
@@ -340,30 +352,30 @@ export const CY_EVT_INIT:Function = function(cy:any){
     let animation_enabled = 'false';
     let padding = 50;
     if( options ){
-      if( options.hasOwnProperty('elements') && options['elements'] ){ 
+      if( options.hasOwnProperty('elements') && options['elements'] ){
         elements = options['elements'];
         partial_layout = true;                  // 부분 레이아웃 적용
       }
-      if( options.hasOwnProperty('boundingBox') && options['boundingBox'] ) 
+      if( options.hasOwnProperty('boundingBox') && options['boundingBox'] )
         boundingBox = options['boundingBox'];
-      if( options.hasOwnProperty('animate') && options['animate'] ) 
+      if( options.hasOwnProperty('animate') && options['animate'] )
         animation_enabled = options['animate'];
-      if( options.hasOwnProperty('padding') && options['padding'] ) 
+      if( options.hasOwnProperty('padding') && options['padding'] )
         padding = options['padding'];
     }
 
     let layoutOption = {
       "name": layout,
-      "fit": (partial_layout) ? false : true, 
-      "padding": padding, 
-      "boundingBox": (partial_layout) ? boundingBox : undefined, 
+      "fit": (partial_layout) ? false : true,
+      "padding": padding,
+      "boundingBox": (partial_layout) ? boundingBox : undefined,
       "nodeDimensionsIncludeLabels": true, randomize: false,
       "animate": animation_enabled == 'true' ? 'end' : false,
       "refresh": 30, "animationDuration": 800, "maxSimulationTime": 2800,
       "ready": function(){
         if( options && options.hasOwnProperty('ready') ) (options.ready)();
-      }, 
-      "stop": function(){ 
+      },
+      "stop": function(){
         if( options && options.hasOwnProperty('stop') ) (options.stop)();
         Promise.resolve(null).then(()=>{
           if( partial_layout ) cy.fit( cy.elements(':visible'), 50 );
@@ -435,7 +447,7 @@ export const CY_EVT_INIT:Function = function(cy:any){
     connectedEdges.forEach(elem => {
       if( uniqLabels.indexOf(elem.data('label')) < 0 ){
         uniqLabels.push(elem.data('label'));
-      } 
+      }
     });
 
     // 4) append recursive results
@@ -474,17 +486,17 @@ export const CY_EVT_INIT:Function = function(cy:any){
     if( !target ){
       let parentId = cy.$api.randomId(cy.scratch('_datasource'));
       let parent = { "group": "nodes"
-                  , "data": { 
+                  , "data": {
                     "id": parentId, "name": (title)?title:'group', "parent": undefined,
                     "props": { "$$size": nodes.size(), "$$members": nodes.map(x=>x.id()) }
                   }
-                  , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } 
+                  , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 }
                   , "selectable": true       // 선택 대상에 포함 (2018-12-03)
                 }
       target = cy.add(parent);
     }
 
-    cy.batch(() => { 
+    cy.batch(() => {
       target.style('width', parentPos.x2-parentPos.x1 );
       target.style('height', parentPos.y2-parentPos.y1 );
       target.scratch('_members', nodes);    // save memebers
@@ -492,8 +504,8 @@ export const CY_EVT_INIT:Function = function(cy:any){
       nodes.forEach(v => {
         v._private.data.parent = target.id();
       });
-      cy.add(nodes); 
-      cy.add(edges); 
+      cy.add(nodes);
+      cy.add(edges);
     });
 
     return target;

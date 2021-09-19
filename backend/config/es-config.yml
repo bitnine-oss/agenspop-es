@@ -1,6 +1,6 @@
 ## config context path to "/" by setting an empty string
 server:
-  port: 8080
+  port: 28080
   error:
     whitelabel:
       enabled: false            # disable default error-page
@@ -14,7 +14,7 @@ spring:
     cache:
       period: 3600              # seconds
   jackson:
-    date-format: "yyyy-MM-dd HH:mm:ss"    # fixed in codes
+    date-format: "yyyy-MM-dd"   # strict_date_optional_time: "yyyy-MM-dd'T'HH:mm:ss.SSSZ" or "yyyy-MM-dd"
     time-zone: Asia/Seoul
 
 agens:
@@ -22,16 +22,16 @@ agens:
     base-path: /api
     query-timeout: 600000       # 1000 ms = 1 sec
   elasticsearch:
-    host: 192.168.0.20
-    port: 29200
+    host: minubt
+    port: 39200
     username: elastic
     password: bitnine
     scroll-limit: -1            # -1(unlimit) or more than 2500
-    vertex-index: agensvertex
-    edge-index: agensedge
+    vertex-index: newsvertex-kg
+    edge-index: newsedge-kg
     edge-validation: false      # if true, check valid edge on each request (make slow)
-    index-shards: 1             # when create index, apply to setting
-    index-replicas: 1           # when create index, apply to setting
+    index-shards: 1             # when create index, apply to settings
+    index-replicas: 0           # when create index, apply to settings
   product:
     name: agenspop-es
     version: 0.7.3

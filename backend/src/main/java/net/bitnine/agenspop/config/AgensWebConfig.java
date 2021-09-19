@@ -45,8 +45,11 @@ public class AgensWebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         // **NOTE: forward도 redirect도 안먹힘
         // registry.addViewController("/").setViewName("redirect:/index.html");
-
         registry.addRedirectViewController("/", "/index.html");
+
+        // 고정된 redirect 이기 때문에
+        // `workspace/:ds` 같은 파라미터를 넘기지 못한다
+        // registry.addRedirectViewController("/workspace/*", "/index.html");
         registry.addRedirectViewController("/workspace", "/index.html");
     }
 }

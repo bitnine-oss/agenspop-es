@@ -49,7 +49,8 @@ public interface BaseGraphAPI {
     long countV(String datasource);
     long countE(String datasource);
 
-    List<String> searchDatasources(String query);
+    List<String> searchDatasources(String query, String extField, String label);
+
     Map<String, Long> searchVertexDatasources(List<String> dsList);
     Map<String, Long> searchEdgeDatasources(List<String> dsList);
 
@@ -153,9 +154,9 @@ public interface BaseGraphAPI {
     BaseVertex findOtherVertexOfEdge(String eid, String vid);
     Stream<BaseVertex> findNeighborVertices(String datasource, String vid, Direction direction, final String[] labels);
 
-    Stream<BaseVertex> findVerticesWithDateRange(final String[] ids, String fromDate, String toDate);
-    Stream<BaseVertex> findVerticesWithDateRange(String datasource, String fromDate, String toDate);
-    Stream<BaseVertex> findVerticesWithDateRange(String datasource, String label, String fromDate, String toDate);
+//    Stream<BaseVertex> findVerticesWithDateRange(final String[] ids, String fromDate, String toDate);
+//    Stream<BaseVertex> findVerticesWithDateRange(String datasource, String fromDate, String toDate);
+//    Stream<BaseVertex> findVerticesWithDateRange(String datasource, String label, String fromDate, String toDate);
 
 
     //////////////////////////////////////////////////
@@ -182,8 +183,8 @@ public interface BaseGraphAPI {
     Stream<BaseEdge> findEdgesOfVertex(String datasource, String vid, Direction direction, final String[] labels);
     Stream<BaseEdge> findEdgesOfVertex(String datasource, String vid, Direction direction, String label, String key, Object value);
 
-    Stream<BaseEdge> findEdgesWithDateRange(final String[] ids, String fromDate, String toDate);
-    Stream<BaseEdge> findEdgesWithDateRange(String datasource, String fromDate, String toDate);
-    Stream<BaseEdge> findEdgesWithDateRange(String datasource, String label, String fromDate, String toDate);
+//    Stream<BaseEdge> findEdgesWithDateRange(final String[] ids, String fromDate, String toDate);
+//    Stream<BaseEdge> findEdgesWithDateRange(String datasource, String fromDate, String toDate);
+//    Stream<BaseEdge> findEdgesWithDateRange(String datasource, String label, String fromDate, String toDate);
 
 }

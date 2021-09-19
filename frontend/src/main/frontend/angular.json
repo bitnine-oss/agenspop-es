@@ -36,8 +36,6 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/lodash/lodash.min.js",
-              "node_modules/popper.js/dist/umd/popper.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
 
               "node_modules/cytoscape/dist/cytoscape.min.js",
               "node_modules/cytoscape-undo-redo/cytoscape-undo-redo.js",
@@ -51,10 +49,12 @@
               "node_modules/layout-base/layout-base.js",
               "node_modules/cose-base/cose-base.js",
               "node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
+
+              "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/cytoscape-popper/cytoscape-popper.js",
               "node_modules/tippy.js/umd/index.all.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
 
-              "node_modules/gaussian/lib/gaussian.js",
               "src/assets/elgrapho/ElGrapho.js"
             ]
           },
@@ -94,8 +94,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "ap-workspace:build",
-            "host": "localhost",
-            "port": 8082
+            "host": "0.0.0.0",
+            "port": 28082
           },
           "configurations": {
             "production": {
@@ -129,8 +129,6 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/lodash/lodash.min.js",
-              "node_modules/popper.js/dist/umd/popper.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
 
               "node_modules/cytoscape/dist/cytoscape.min.js",
               "node_modules/cytoscape-undo-redo/cytoscape-undo-redo.js",
@@ -144,10 +142,12 @@
               "node_modules/layout-base/layout-base.js",
               "node_modules/cose-base/cose-base.js",
               "node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
+
+              "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/cytoscape-popper/cytoscape-popper.js",
               "node_modules/tippy.js/umd/index.all.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
 
-              "node_modules/gaussian/lib/gaussian.js",
               "src/assets/elgrapho/ElGrapho.js"
             ]
           }

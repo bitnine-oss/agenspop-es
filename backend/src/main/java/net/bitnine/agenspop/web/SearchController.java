@@ -114,82 +114,7 @@ curl -X GET "localhost:8080/elastic/sample/e"
     }
 
     ///////////////////////////////////////////////////////////////
-    // APIs withDateRange
 
-    @PostMapping(value="/v/ids/date"
-            , consumes="application/json; charset=UTF-8"
-            , produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> findV_Ids_WithDateRange(
-            @RequestBody Map<String,Object> param
-    ) throws Exception {
-        List<String> ids = (List<String>) param.get("q");
-        String[] array = new String[ ids.size()];
-        String fromDate = param.containsKey("from") ? param.get("from").toString() : null;
-        String toDate = param.containsKey("to") ? param.get("to").toString() : null;
-        // System.out.println(String.format("/search/v/ids => %s, %s, %s", ids, fromDate, toDate));
-        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , ids.size() == 0 ? Stream.empty() :
-                        base.findVerticesWithDateRange(ids.toArray(array), fromDate, toDate) );
-    }
-    @PostMapping(value="/e/ids/date"
-            , consumes="application/json; charset=UTF-8"
-            , produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> findE_Ids_WithDateRange(
-            @RequestBody Map<String,Object> param
-    ) throws Exception {
-        List<String> ids = (List<String>) param.get("q");
-        String[] array = new String[ids.size()];
-        String fromDate = param.containsKey("from") ? param.get("from").toString() : null;
-        String toDate = param.containsKey("to") ? param.get("to").toString() : null;
-        // System.out.println(String.format("/search/e/ids => %s, %s, %s", ids, fromDate, toDate));
-        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , ids.size() == 0 ? Stream.empty() :
-                        base.findEdgesWithDateRange(ids.toArray(array), fromDate, toDate) );
-    }
-
-    @GetMapping(value="/{datasource}/v/date", produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> findV_All_WithDateRange(
-            @PathVariable String datasource,
-            @RequestParam(value="from", required=false) String fromDate,
-            @RequestParam(value="to", required=false) String toDate
-    ) throws Exception {
-        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , base.findVerticesWithDateRange(datasource, fromDate, toDate) );
-    }
-    @GetMapping(value="/{datasource}/e/date", produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> findE_All_WithDateRange(
-            @PathVariable String datasource,
-            @RequestParam(value="from", required=false) String fromDate,
-            @RequestParam(value="to", required=false) String toDate
-    ) throws Exception {
-        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , base.findEdgesWithDateRange(datasource, fromDate, toDate) );
-    }
-
-    @GetMapping(value="/{datasource}/v/label/date", produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> findV_Label(
-            @PathVariable String datasource,
-            @RequestParam(value="q", required=true) String label,
-            @RequestParam(value="from", required=false) String fromDate,
-            @RequestParam(value="to", required=false) String toDate
-    ) throws Exception {
-        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , label.isEmpty() ? Stream.empty() :
-                        base.findVerticesWithDateRange(datasource, label, fromDate, toDate) );
-    }
-    @GetMapping(value="/{datasource}/e/labels/date", produces="application/stream+json; charset=UTF-8")
-    public ResponseEntity<?> findE_Label(
-            @PathVariable String datasource,
-            @RequestParam(value="q", required=true) String label,
-            @RequestParam(value="from", required=false) String fromDate,
-            @RequestParam(value="to", required=false) String toDate
-    ) throws Exception {
-        return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
-                , label.isEmpty() ? Stream.empty() :
-                        base.findEdgesWithDateRange(datasource, label, fromDate, toDate) );
-    }
-
-    ///////////////////////////////////////////////////////////////
 
     /*
 curl -X GET "localhost:8080/api/search/modern/v/neighbors?q=modern_1"
@@ -267,52 +192,48 @@ body: {
 
 
     /*
-curl -X GET "localhost:8080/api/search/sample/v/ids?q=modern_1,modern_2"
-curl -X GET "localhost:8080/api/search/sample/e/ids?q=modern_7,modern_8"
+curl -X GET "localhost:8080/api/search/whole/v/ids?q=modern_1,modern_2"
+curl -X GET "localhost:8080/api/search/whole/e/ids?q=modern_7,modern_8"
     */
-    @GetMapping(value="/{datasource}/v/ids", produces="application/stream+json; charset=UTF-8")
+    @GetMapping(value="/whole/v/ids", produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> findV_Ids(
-            @PathVariable String datasource,
             @RequestParam(value = "q") List<String> ids
     ) throws Exception {
         String[] array = new String[ids.size()];
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
                 , ids.size() == 0 ? Stream.empty() :
-                        base.findVerticesByIds(datasource, ids.toArray(array)) );
+                        base.findVertices( ids.toArray(array)) );
     }
-    @PostMapping(value="/{datasource}/v/ids"
+    @PostMapping(value="/whole/v/ids"
             , consumes="application/json; charset=UTF-8"
             , produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> findV_Ids_Post(
-            @PathVariable String datasource,
             @RequestBody Map<String,List<String>> param
     ) throws Exception {
         String[] array = new String[param.get("q").size()];
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
                 , param.get("q").size() == 0 ? Stream.empty() :
-                        base.findVerticesByIds(datasource, param.get("q").toArray(array)) );
+                        base.findVertices( param.get("q").toArray(array)) );
     }
-    @GetMapping(value="/{datasource}/e/ids", produces="application/stream+json; charset=UTF-8")
+    @GetMapping(value="/whole/e/ids", produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> findE_Ids(
-            @PathVariable String datasource,
             @RequestParam(value = "q") List<String> ids
     ) throws Exception {
         String[] array = new String[ids.size()];
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
                 , ids.size() == 0 ? Stream.empty() :
-                        base.findEdgesByIds(datasource, ids.toArray(array)) );
+                        base.findEdges( ids.toArray(array)) );
     }
-    @PostMapping(value="/{datasource}/e/ids"
+    @PostMapping(value="/whole/e/ids"
             , consumes="application/json; charset=UTF-8"
             , produces="application/stream+json; charset=UTF-8")
     public ResponseEntity<?> findE_Ids_Post(
-            @PathVariable String datasource,
             @RequestBody Map<String,List<String>> param
     ) throws Exception {
         String[] array = new String[param.get("q").size()];
         return AgensUtilHelper.responseStream(mapper, AgensUtilHelper.productHeaders(productProperties)
                 , param.get("q").size() == 0 ? Stream.empty() :
-                        base.findEdgesByIds(datasource, param.get("q").toArray(array)) );
+                        base.findEdges( param.get("q").toArray(array)) );
     }
 
 

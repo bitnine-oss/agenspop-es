@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {from, throwError, of } from 'rxjs';
+import { from, throwError, of } from 'rxjs';
 import { map, share, tap, catchError, concatAll, timeout } from 'rxjs/operators';
 import * as _ from 'lodash';
 
@@ -18,7 +18,7 @@ export class ApApiService {
 
   constructor(private _http: HttpClient) {
     // for DEBUG
-    if( DEV_MODE ) this.apiUrl = 'http://localhost:8080';
+    if( DEV_MODE ) this.apiUrl = 'http://localhost:28080';
   }
 
   // meta query
@@ -32,15 +32,15 @@ export class ApApiService {
   // meta query
   // http://27.117.163.21:15632/api/admin/graphs
   public findDatasources() {
-    let uri = this.apiUrl+'/api/admin/graphs';
+    let uri = this.apiUrl+'/api/admin/graphs?limit=15';
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     return this._http.get<any>( uri, { headers : headers });
   }
 
   // meta query
-  // http://27.117.163.21:15632/api/admin/graphs/search/{query}
+  // http://localhost:28080/api/admin/graphs/search?ext=korean&label=document&q=서북부%20경남%20지역%20경제
   public searchDatasources(query:string) {
-    let uri = this.apiUrl+'/api/admin/graphs/search/'+query;
+    let uri = this.apiUrl+'/api/admin/graphs/search?q='+query;
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     return this._http.get<any>( uri, { headers : headers });
   }
@@ -93,9 +93,9 @@ export class ApApiService {
     return this._http.get<IElement>(this.apiUrl+'/api/search/'+index+'/'+id);
   }
 
-  // http://27.117.163.21:15632/api/search/modern/v/ids
-  public findByIds(dataSource:string, index:string, ids: string[]) {
-    let uri = this.apiUrl+'/api/search/'+dataSource+'/'+index+'/ids';
+  // http://27.117.163.21:15632/api/search/whole/v/ids
+  public findByIds(index:string, ids: string[]) {
+    let uri = this.apiUrl+'/api/search/whole/'+index+'/ids';
     let body = {q: ids};
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     return this._http.post<IElement[]>( uri, body, { headers: headers })

@@ -136,18 +136,6 @@ public class ElasticVertexService extends ElasticElementService {
                 , label, labels, key, keyNot, keys, values, kvPairs);
     }
 
-    ///////////////////////////////////////////////////////////////
-    // APIs : withDateRange
-
-    public Stream<ElasticVertex> streamByIdsWithDateRange(String[] ids, String fromDate, String toDate) throws Exception {
-        return super.streamByIdsWithDateRange(INDEX, ElasticVertex.class, ids, fromDate, toDate);
-    }
-    public Stream<ElasticVertex> streamByDatasourceWithDateRange(String datasource, String fromDate, String toDate) throws Exception {
-        return super.streamByDatasourceWithDateRange(INDEX, ElasticVertex.class, datasource, fromDate, toDate);
-    }
-    public Stream<ElasticVertex> streamByDatasourceAndLabelWithDateRange(String datasource, String label, String fromDate, String toDate) throws Exception {
-        return super.streamByDatasourceAndLabelWithDateRange(INDEX, ElasticVertex.class, datasource, label, fromDate, toDate);
-    }
 
     ///////////////////////////////////////////////////////////////
     //

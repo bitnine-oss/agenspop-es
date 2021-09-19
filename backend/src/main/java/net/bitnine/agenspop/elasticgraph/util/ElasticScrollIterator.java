@@ -123,7 +123,6 @@ public class ElasticScrollIterator<T extends ElasticElement> implements Iterator
             // **BUG: date sorting not working. why? (But, sort by _id is working)
             if( this.sortOrder != null ) searchSourceBuilder.sort(
                     new FieldSortBuilder("id").order(this.sortOrder) );
-                    // new FieldSortBuilder(BaseElement.timestampField).order(this.sortOrder) );
 
             searchRequest.source(searchSourceBuilder);
             searchRequest.scroll(SCROLL_TIME);

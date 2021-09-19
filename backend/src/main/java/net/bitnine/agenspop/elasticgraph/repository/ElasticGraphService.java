@@ -2,7 +2,6 @@ package net.bitnine.agenspop.elasticgraph.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -14,8 +13,10 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
@@ -32,8 +33,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.elasticsearch.index.query.QueryBuilders.termQuery;
-import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 @Slf4j
 public class ElasticGraphService {
@@ -233,36 +233,54 @@ public class ElasticGraphService {
         return result;
     }
 
+/*
+GET /newsvertex/_search?pretty
+{
+  "from" : 0, "size" : 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": { "label": "document" }}
+      ],
+      "must": [
+        { "match": { "@text.korean": { "query": "서북부 경남 지역 경제 왕복 4차선도로", "operator": "and" } } }
+      ]
+    }
+  }
+}
+*/
+
     // query 에 매칭되는 datasource list 만 반환한다
-    public List<String> searchDatasources(String index, String query) throws Exception {
+    public List<String> searchDatasources(String index, String query, String extField, String label) throws Exception {
         // query : match and aggregation
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        // define : nested query
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.nestedQuery("properties",
-                    QueryBuilders.boolQuery().must(
-                            QueryBuilders.queryStringQuery("properties.value:\"" + query.toLowerCase() + "\""))
-                    , ScoreMode.Total));
-        // append : aggregation
+
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        // add filter
+        if( label != null )
+            queryBuilder = queryBuilder.filter(termQuery("label", label));
+        // add must.match with 'and' operator
+        String textField = "@text" + (extField != null ? "."+extField : "");
+        queryBuilder = queryBuilder.must(
+                matchQuery(textField, query).operator(Operator.AND)
+        );
+        // define search: query, size (,from ..)
+        String[] includeFields = new String[] {"title"};
         searchSourceBuilder.query(queryBuilder)
-                .aggregation(AggregationBuilders.terms("datasources")
-                        .field("datasource").order(BucketOrder.key(true))
-                        .size(AGG_BUCKET_SIZE)
-                ).size(0);
+                .size(100)                      // max_size = 10000
+                .fetchSource("datasource",null);
 
         // request
         SearchRequest searchRequest = new SearchRequest(index);
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        // response
-        Aggregations aggregations = searchResponse.getAggregations();
-        Terms labels = aggregations.get("datasources");
 
-        List<String> result = new ArrayList<>();
-        labels.getBuckets().forEach(b->{
-            result.add(b.getKeyAsString());
-        });
-        return result;
+        SearchHit[] searchHit = searchResponse.getHits().getHits();
+        Set result=new HashSet();
+        for (SearchHit hit : searchHit){
+            result.add( hit.getSourceAsMap().get("datasource").toString() );
+        }
+        return new ArrayList<>(result);
     }
 
 }

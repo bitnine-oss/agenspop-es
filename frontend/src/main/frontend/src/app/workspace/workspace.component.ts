@@ -1,4 +1,6 @@
-import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
 import { Observable, of, Subject, timer, forkJoin } from 'rxjs';
 import { catchError, map, tap, debounceTime  } from 'rxjs/operators';
 
@@ -23,7 +25,7 @@ g.V().hasLabel('order').sample(300);`;
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.css']
 })
-export class WorkspaceComponent implements AfterViewInit, OnDestroy {
+export class WorkspaceComponent implements OnInit, OnDestroy {
 
   screenMode:string = 'init';
   undoable:boolean = false;
@@ -62,27 +64,34 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   private timeLabel:string = null;
 
   constructor(
+    private route: ActivatedRoute,
     private apApiService: ApApiService,
     private spinner: NgxSpinnerService,
     private _cd: ChangeDetectorRef        // DANGEROUS!!
   ) { }
 
-  ngAfterViewInit() {
-    /*
-    // for Dev of graph-contraction
-    this.loadQueryByGremlin('northwind', SCRIPT_GREMLIN);
-    setTimeout(()=>{
-      console.log('soon go to canvas...', this.g.nodes.length);
-      if( this.g.nodes.length > 0 ){
-        let nodes = this.g.nodes.map(x=>{ return {id: x.data.id}; });
-        this.cropToCyGraph({ nodes: nodes, pan: undefined });
-
-        setTimeout(()=>{
-          this.changeLayout('cose');
-        },1500);
-      }
-    }, 3000);
-    */
+  ngOnInit(){
+    // parameters of routes
+    this.route.paramMap.subscribe(params => {
+        // console.log('paramMap:', params.get('id'));
+        let ds = params.get('ds');
+        console.log('param[datasource] =', ds);
+        if( ds ){
+            // data of routes
+            this.route.data.subscribe(data => {
+                if( data.hasOwnProperty('mode') ) localStorage.setItem('init-mode', data['mode'].toString());
+                if( data.hasOwnProperty('debug') ) localStorage.setItem('debug', data['debug'].toString());
+                // load datasource
+                this.loadDatasource( ds );
+            });
+        }
+        else{
+            this.apApiService.loadConfig().subscribe(x => {	// callback
+                if( x.hasOwnProperty('debug') && x['debug'] ) console.log('** config:', x);
+                Object.keys(x).forEach(key=>localStorage.setItem(key,x[key]));    // save value as string
+            });
+        }
+    });
   }
 
   ngOnDestroy(){
@@ -93,7 +102,8 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
 
   changeScreenMode($event){
     // for DEBUG
-    if( localStorage.getItem('debug')=='true' ) console.log(`** screenMode change '${this.screenMode}' to '${$event}'`);
+    if( localStorage.getItem('debug')=='true' )
+        console.log(`** screenMode change '${this.screenMode}' to '${$event}'`);
 
     this.screenMode = $event;
     this.gSearch = this.screenMode == 'webgl' ? this.gEl : this.gCy;
@@ -148,8 +158,8 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
       setTimeout(()=>{ this.dispLabels.edges = [...$event.data]; }, 2);
     }
     else if( $event.type == 'layouts' ){
-      setTimeout(()=>{ 
-        this.dispLayouts = [...$event.data]; 
+      setTimeout(()=>{
+        this.dispLayouts = [...$event.data];
         this.spinner.hide();
       }, 2);
     }
@@ -552,7 +562,7 @@ export class WorkspaceComponent implements AfterViewInit, OnDestroy {
       }
       else{
         this.canvasScreen.changeLayout(name);
-      }  
+      }
     }, 100);
   }
 

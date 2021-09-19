@@ -10,7 +10,10 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -22,65 +25,17 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 
 public final class ElasticHelper {
 
-    // **NOTE: move to BaseElement(interface)
-//    public static final String createdTag = "_$$created";   // "@timestamp" 는 Java에서 변수명이 못됨;
-//    public static final DateTimeFormatter createdFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//    public static final DateTimeFormatter[] validFormatters = {
-//            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-//            DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
-//    };
-
-    private static final LocalDateTime convertByFormatters(String value){
-        // ** 꼼수: 뒤에 시간절이 없거나, .zzZ 같은 ms 단위가 있을 시 변경
-        if( value.length() <= 10 ) value += BaseElement.dummyTime;
-        else if( value.indexOf('.') >= 14 ) value = value.substring(0, value.indexOf('.'));
-
-        LocalDateTime converted = null;
-        for( DateTimeFormatter formatter: BaseElement.validFormatters){
-            try{
-                converted = LocalDateTime.parse(value, formatter);
-                break;
-            }catch (DateTimeParseException e){
-                // ignore exception
-            }
-        }
-        return converted;
+    private static final Long localDateTimeToEpochMillis(LocalDateTime ldt){
+        // LocalDateTime ldt = LocalDateTime.of(2014, 5, 29, 18, 41, 16);
+        ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+        return zdt.toInstant().toEpochMilli();
     }
 
-    public static final LocalDateTime str2date(String value){
-        if( value == null || value.isEmpty() ) return null;
-        return convertByFormatters(value.trim());
+    private static final LocalDateTime epochMillisToLocalDateTime(Long value){
+        // Long value = 1367199974000;
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault());
     }
 
-    public static final String date2str(LocalDateTime value){
-        if( value == null ) return null;
-        return value.format(BaseElement.createdFormatter);
-    }
-
-    public static final boolean checkDateformat(String value){
-        return str2date(value) != null ? true : false;
-//        try {
-//            LocalDateTime date = LocalDateTime.parse(value, validFormatter);    //createdFormatter);
-//        }catch (DateTimeParseException e){
-//            return false;
-//        }
-    }
-
-    public static String getCreatedDate(final List<ElasticProperty> properties) {
-        for(BaseProperty property : properties) {
-            if( property.key().equals(BaseElement.timestampTag) && checkDateformat(property.valueOf()) ){
-                return property.valueOf();
-            }
-        }
-        return null;
-    }
-
-    public static void setCreatedDate(ElasticElement element){
-        if( element.getTimestamp() != null ) return;
-        String created = getCreatedDate(element.getProperties());
-        if( created == null ) created = date2str(LocalDateTime.now()); // if not exists, set NOW() to created
-        element.setTimestamp( created );
-    }
 
     // **NOTE: stream 은 재사용이 안됨!! 특히나 무한 리스트인 경우
     //      - .peek() 함수를 사용하려 했으나 vid 필터링 과정 때문에 안됨

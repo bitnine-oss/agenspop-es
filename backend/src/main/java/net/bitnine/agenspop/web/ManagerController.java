@@ -58,8 +58,10 @@ public class ManagerController {
     }
 
     @GetMapping(value="/graphs", produces="application/json; charset=UTF-8")
-    public ResponseEntity<Map<String, String>> listGraphs() throws Exception {
-        Set<String> names = manager.getGraphNames();
+    public ResponseEntity<Map<String, String>> listGraphs(
+            @RequestParam(value = "limit", defaultValue="-1") int limit
+    ) throws Exception {
+        Set<String> names = limit <= 0 ? manager.getGraphNames() : manager.getGraphNames(limit);
         Map<String, String> graphs = new HashMap<>();
         for( String name : names ){
             graphs.put(name, manager.getGraph(name).toString());
@@ -68,9 +70,13 @@ public class ManagerController {
                 , AgensUtilHelper.productHeaders(productProperties), HttpStatus.OK);
     }
 
-    @GetMapping(value="/graphs/search/{query}", produces="application/json; charset=UTF-8")
-    public ResponseEntity searchGraphs(@PathVariable String query) throws Exception {
-        Map<String, String> graphs = manager.searchGraphs(query);
+    @GetMapping(value="/graphs/search", produces="application/json; charset=UTF-8")
+    public ResponseEntity searchGraphs(         // @PathVariable String query
+            @RequestParam(value = "q") String query,
+            @RequestParam(value = "ext", required = false) String extField,
+            @RequestParam(value = "label", required = false) String label
+    ) throws Exception {
+        Map<String, String> graphs = manager.searchGraphs(query, extField, label);
         return new ResponseEntity(graphs
                 , AgensUtilHelper.productHeaders(productProperties), HttpStatus.OK);
     }

@@ -111,7 +111,10 @@ public class AgensGraphManager implements GraphManager {
 
     @Override
     public Set<String> getGraphNames() {
-        return graphs.keySet();
+        return graphs.keySet().stream().limit(20).collect(Collectors.toSet());
+    }
+    public Set<String> getGraphNames(int limit) {
+        return graphs.keySet().stream().limit(limit).collect(Collectors.toSet());
     }
 
     @Override
@@ -250,8 +253,8 @@ public class AgensGraphManager implements GraphManager {
 
     public Map<String,String> getGraphStates(){ return this.graphStates; }
 
-    public Map<String,String> searchGraphs(String query){
-        List<String> dsList = baseAPI.searchDatasources(query);
+    public Map<String,String> searchGraphs(String query, String extField, String label){
+        List<String> dsList = baseAPI.searchDatasources(query, extField, label);
         // get datasources with vertex size and edge size
         Map<String, Long> dsVlist = baseAPI.searchVertexDatasources(dsList);
         Map<String, Long> dsElist = baseAPI.searchEdgeDatasources(dsList);
